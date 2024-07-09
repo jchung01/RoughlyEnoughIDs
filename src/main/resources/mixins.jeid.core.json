@@ -12,6 +12,7 @@
     "misc.MixinStatList",
     "network.MixinPacketBuffer",
     "network.MixinPacketUtil",
+    "network.MixinSPacketBlockAction",
     "network.MixinSPacketChunkData",
     "potion.MixinSPacketEntityEffect",
     "potion.MixinSPacketRemoveEntityEffect",
