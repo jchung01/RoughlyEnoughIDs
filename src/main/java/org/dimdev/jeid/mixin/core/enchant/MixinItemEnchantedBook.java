@@ -18,14 +18,13 @@ public class MixinItemEnchantedBook {
         return nbtTagCompound.getInteger("id");
     }
 
-    // LVT gets modified by above mixin, let's just remove the short, add the int id
+    // LVT gets modified by above mixin, let's just overwrite the short id
     @ModifyArg(method = "addEnchantment", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagList;appendTag(Lnet/minecraft/nbt/NBTBase;)V", ordinal = 0))
     private static NBTBase reid$setIntEnchIdForAdd(NBTBase nbt, @Local(argsOnly = true) EnchantmentData data) {
         if (!(nbt instanceof NBTTagCompound)) {
             throw new AssertionError(JEID.MODID + " :: NBTTagList#appendTag argument of addEnchantment isn't \"NBTTagCompound\"");
         }
         NBTTagCompound nbtTagCompound = (NBTTagCompound) nbt;
-        nbtTagCompound.removeTag("id");
         nbtTagCompound.setInteger("id", Enchantment.getEnchantmentID(data.enchantment));
         return nbtTagCompound;
     }
