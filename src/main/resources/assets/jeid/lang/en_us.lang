@@ -1,2 +1,9 @@
-﻿cfg.reid.mainTitle=RoughlyEnoughIDs Config
+﻿# CONFIG
+cfg.reid.mainTitle=RoughlyEnoughIDs Config
 cfg.reid.debug=Debug
+
+# NEID COMPAT SCREEN
+msg.reid.neidcompat.warning1=REID detected Not Enough IDs (NEID) is installed.
+msg.reid.neidcompat.warning2=Having both may cause issues with worldgen/loading!
+msg.reid.neidcompat.warning3=§cPlease remove NEID to continue.
+msg.reid.neidcompat.warning4=Don't worry, even without NEID, REID will safely convert NEID worlds.
