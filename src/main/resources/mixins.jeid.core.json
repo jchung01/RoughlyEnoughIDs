@@ -8,7 +8,6 @@
     "enchant.MixinEnchantmentHelper",
     "enchant.MixinItemEnchantedBook",
     "misc.MixinBlock",
-    "misc.MixinDedicatedServer",
     "misc.MixinGameData",
     "misc.MixinStatList",
     "network.MixinPacketBuffer",
@@ -33,5 +32,8 @@
     "potion.client.MixinNetHandlerPlayClient",
     "world.client.MixinChunk",
     "world.client.MixinWorldSummary"
+  ],
+  "server": [
+    "misc.MixinDedicatedServer"
   ]
 }
