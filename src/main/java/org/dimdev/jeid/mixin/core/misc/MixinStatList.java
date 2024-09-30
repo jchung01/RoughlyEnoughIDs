@@ -1,6 +1,8 @@
 package org.dimdev.jeid.mixin.core.misc;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -23,10 +25,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Rewrite most of the class to support an unlimited number of IDs (map rather than array).
@@ -63,17 +64,17 @@ public final class MixinStatList {
     @Shadow
     private static StatBase[] OBJECTS_DROPPED_STATS;
     @Unique
-    private static final Map<Block, StatBase> BLOCKS_STATS_MAP = new HashMap<>();
+    private static final Map<Block, StatBase> BLOCKS_STATS_MAP = new Reference2ObjectOpenHashMap<>();
     @Unique
-    private static final Map<Item, StatBase> CRAFTS_STATS_MAP = new HashMap<>();
+    private static final Map<Item, StatBase> CRAFTS_STATS_MAP = new Reference2ObjectOpenHashMap<>();
     @Unique
-    private static final Map<Item, StatBase> OBJECT_USE_STATS_MAP = new HashMap<>();
+    private static final Map<Item, StatBase> OBJECT_USE_STATS_MAP = new Reference2ObjectOpenHashMap<>();
     @Unique
-    private static final Map<Item, StatBase> OBJECT_BREAK_STATS_MAP = new HashMap<>();
+    private static final Map<Item, StatBase> OBJECT_BREAK_STATS_MAP = new Reference2ObjectOpenHashMap<>();
     @Unique
-    private static final Map<Item, StatBase> OBJECTS_PICKED_UP_STATS_MAP = new HashMap<>();
+    private static final Map<Item, StatBase> OBJECTS_PICKED_UP_STATS_MAP = new Reference2ObjectOpenHashMap<>();
     @Unique
-    private static final Map<Item, StatBase> OBJECTS_DROPPED_STATS_MAP = new HashMap<>();
+    private static final Map<Item, StatBase> OBJECTS_DROPPED_STATS_MAP = new Reference2ObjectOpenHashMap<>();
 
     /**
      * @reason Reduce memory footprint of stat arrays
@@ -364,7 +365,7 @@ public final class MixinStatList {
         int requiredCapacity = BLOCKS_STATS_MAP.size() + CRAFTS_STATS_MAP.size()
                 + OBJECT_USE_STATS_MAP.size() + OBJECT_BREAK_STATS_MAP.size()
                 + OBJECTS_PICKED_UP_STATS_MAP.size() + OBJECTS_DROPPED_STATS_MAP.size();
-        HashSet<StatBase> knownStats = new HashSet<>((int) Math.ceil(requiredCapacity / 0.75f));
+        Set<StatBase> knownStats = new ObjectOpenHashSet<>(requiredCapacity + 1);
         knownStats.addAll(BLOCKS_STATS_MAP.values());
         knownStats.addAll(CRAFTS_STATS_MAP.values());
         knownStats.addAll(OBJECT_USE_STATS_MAP.values());
