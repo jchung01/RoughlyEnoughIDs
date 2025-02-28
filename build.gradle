@@ -169,7 +169,10 @@ dependencies {
     compileOnly rfg.deobf("curse.maven:cubicchunks-292243:5135427")
     // RTG+ should also work
     compileOnly rfg.deobf("curse.maven:rtg-unofficial-648514:4696300")
+    implementation rfg.deobf("curse.maven:chunk-pregenerator-267193:5632153")
 
+    // Chunk Pregenerator dependency
+    runtimeOnly "curse.maven:carbon-config-898104:5504476"
     // implementation "curse.maven:LibVulpes-236541:3801015"
     // implementation "curse.maven:Baubles-227083:2518667"
     // implementation "curse.maven:mm-library-368098:3254750"
