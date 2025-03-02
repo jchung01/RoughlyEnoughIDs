@@ -43,6 +43,9 @@ public class JEIDMixinLoader implements ILateMixinLoader {
         if (Loader.isModLoaded("creepingnether")) {
             configs.add("mixins.jeid.creepingnether.json");
         }
+        if (Loader.isModLoaded("chunkpregenerator")) {
+            configs.add("mixins.jeid.chunkpregenerator.json");
+        }
         if (Loader.isModLoaded("cubicchunks")) {
             configs.add("mixins.jeid.cubicchunks.json");
         }
