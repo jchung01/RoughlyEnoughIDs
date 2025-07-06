@@ -14,6 +14,10 @@ public class ConfigHandler {
     @Config.Name("Debug")
     public static final DebugCategory DEBUG = new DebugCategory();
 
+    @Config.LangKey("cfg.reid.transformer")
+    @Config.Name("Transformers")
+    public static final TransformerCategory TRANSFORMER = new TransformerCategory();
+
     public static class DebugCategory {
         @Config.RequiresMcRestart
         @Config.Name("Biomes")
@@ -64,6 +68,20 @@ public class ConfigHandler {
         @Config.Name("Potions - Amount")
         @Config.Comment("The amount of potions to register.")
         public int reidDebugPotionsAmt = 300;
+    }
+
+    public static class TransformerCategory {
+        @Config.RequiresMcRestart
+        @Config.Name("Patch Targets: Chunk biome initialization")
+        @Config.Comment
+            ({
+                "Some mods may generate chunks outside of the expected class and need REID to inject its biome initialization.",
+                "The issue generally manifests as random patches of plains biomes in chunks.",
+                "Specify classes here by their fully qualified class name."
+            })
+        public String[] chunkBiomeInitPatchList = new String[] {
+            "pregenerator.impl.processor.generator.ChunkHelper"
+        };
     }
 
     @Mod.EventBusSubscriber(modid = JEID.MODID)

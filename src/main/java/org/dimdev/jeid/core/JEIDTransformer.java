@@ -2,12 +2,17 @@ package org.dimdev.jeid.core;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
+import org.dimdev.jeid.JEIDLogger;
+import org.dimdev.jeid.config.ConfigHandler;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -20,13 +25,30 @@ import java.util.function.Predicate;
  * <a href="https://github.com/zabi94/MaxPotionIDExtender">MaxPotionIDExtender by Zabi94</a>
  */
 public class JEIDTransformer implements IClassTransformer {
+    private final Map<String, Function<byte[], byte[]>> transformations;
+
+    public JEIDTransformer() {
+        transformations = new HashMap<>();
+
+        addTransformation("net.minecraft.item.ItemStack", this::patchItemEnchantTag);
+        addTransformation("net.minecraft.potion.PotionEffect", this::patchPotionTag);
+
+        addTransformation("net.minecraft.world.gen.ChunkProviderServer", ChunkBiomeInjector::injectBiomeArrayInit);
+        for (String extraTarget : ConfigHandler.TRANSFORMER.chunkBiomeInitPatchList) {
+            addTransformation(extraTarget, ChunkBiomeInjector::injectBiomeArrayInit);
+        }
+    }
+
+    public void addTransformation(String key, Function<byte[], byte[]> value) {
+        JEIDLogger.LOGGER.info("Adding class {} to the transformation queue", key);
+        transformations.put(key, value);
+    }
+
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
-        if (transformedName.equals("net.minecraft.item.ItemStack")) {
-            return transformItemStack(basicClass);
-        }
-        if (transformedName.equals("net.minecraft.potion.PotionEffect")) {
-            return transformPotionEffect(basicClass);
+        Function<byte[], byte[]> transform = transformations.get(transformedName);
+        if (transform != null) {
+            return transform.apply(basicClass);
         }
         return basicClass;
     }
@@ -70,7 +92,7 @@ public class JEIDTransformer implements IClassTransformer {
         return target;
     }
 
-    private byte[] transformItemStack(byte[] basicClass) {
+    private byte[] patchItemEnchantTag(byte[] basicClass) {
         ClassReader cr = new ClassReader(basicClass);
         ClassNode cn = new ClassNode();
         cr.accept(cn, 0);
@@ -99,7 +121,7 @@ public class JEIDTransformer implements IClassTransformer {
         return cw.toByteArray();
     }
 
-    private byte[] transformPotionEffect(byte[] basicClass) {
+    private byte[] patchPotionTag(byte[] basicClass) {
         ClassReader cr = new ClassReader(basicClass);
         ClassNode cn = new ClassNode();
         cr.accept(cn, 0);
