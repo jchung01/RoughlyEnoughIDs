@@ -1,4 +1,4 @@
-package org.dimdev.jeid.core;
+package org.dimdev.jeid.util;
 
 import org.objectweb.asm.tree.*;
 

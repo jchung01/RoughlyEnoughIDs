@@ -4,6 +4,7 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import org.dimdev.jeid.JEIDLogger;
 import org.dimdev.jeid.config.ConfigHandler;
+import org.dimdev.jeid.util.ASMException;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
