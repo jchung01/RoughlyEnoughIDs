@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(PacketUtil.class)
+@Mixin(value = PacketUtil.class, remap = false)
 public abstract class MixinPacketUtil {
     @Redirect(method = "writeItemStackFromClientToServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;writeShort(I)Lio/netty/buffer/ByteBuf;", ordinal = 0))
     private static ByteBuf reid$writeIntItemId(PacketBuffer packetBuffer, int p_writeShort_1_) {
