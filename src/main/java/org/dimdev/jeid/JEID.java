@@ -2,14 +2,14 @@ package org.dimdev.jeid;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.dimdev.jeid.biome.BiomeError;
 import org.dimdev.jeid.debug.RegistryDebug;
 import org.dimdev.jeid.jeid.Tags;
 import org.dimdev.jeid.network.MessageManager;
+import org.dimdev.jeid.proxy.IProxy;
 
 @Mod(modid = JEID.MODID,
      name = JEID.NAME,
@@ -45,9 +45,13 @@ public class JEID {
         + "after:twilightforest;"
         + "after:wyrmsofnyrus;"
         + "after:worldedit";
+    @SidedProxy(clientSide = "org.dimdev.jeid.proxy.ClientProxy", serverSide = "org.dimdev.jeid.proxy.ServerProxy")
+    public static IProxy proxy;
+
 
     @Mod.EventHandler
     public void onPreInit(FMLPreInitializationEvent event) {
+        proxy.checkIncompatibleMods();
         // Register messages
         MessageManager.init();
         // Register Error Biome

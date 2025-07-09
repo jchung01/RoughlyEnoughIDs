@@ -24,10 +24,9 @@ public class MixinBlock {
     // @ModifyReturnValue doesn't seem to work here
     @Inject(method = "getStateId", at = @At(value = "RETURN"), cancellable = true)
     private static void reid$getJEIDStateId(IBlockState state, CallbackInfoReturnable<Integer> cir, @Local Block block) {
-        // Block block = state.getBlock();
         int id = getIdFromBlock(block);
         int meta = block.getMetaFromState(state);
-        if ((id & 0xfffff000) == 0) {
+        if ((id & 0xFFFFF000) == 0) {
             // Use vanilla 4 bit meta + 12 bit ID
             return;
         }
@@ -41,10 +40,10 @@ public class MixinBlock {
      */
     @ModifyArg(method = "getStateById", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;getBlockById(I)Lnet/minecraft/block/Block;"), index = 0)
     private static int reid$useJEIDId(int vanillaId, @Local(ordinal = 0, argsOnly = true) int stateId) {
-        if ((stateId & 0xffff0000) == 0) {
+        if ((stateId & 0xFFFF0000) == 0) {
             return vanillaId;
         } else {
-            return stateId >> 4;
+            return (stateId >> 4) & 0xFFFFFFF;
         }
     }
 
@@ -53,7 +52,7 @@ public class MixinBlock {
      */
     @ModifyArg(method = "getStateById", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;getStateFromMeta(I)Lnet/minecraft/block/state/IBlockState;"), index = 0)
     private static int reid$useJEIDMeta(int vanillaMeta, @Local(ordinal = 0, argsOnly = true) int stateId) {
-        if ((stateId & 0xffff0000) == 0) {
+        if ((stateId & 0xFFFF0000) == 0) {
             return vanillaMeta;
         } else {
             return stateId & 0xF;

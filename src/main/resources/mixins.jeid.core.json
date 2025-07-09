@@ -12,6 +12,7 @@
     "misc.MixinStatList",
     "network.MixinPacketBuffer",
     "network.MixinPacketUtil",
+    "network.MixinSPacketBlockAction",
     "network.MixinSPacketChunkData",
     "potion.MixinSPacketEntityEffect",
     "potion.MixinSPacketRemoveEntityEffect",
@@ -19,7 +20,6 @@
     "world.MixinBlockStateContainer",
     "world.MixinChunk",
     "world.MixinChunkPrimer",
-    "world.MixinChunkProviderServer",
     "world.MixinGenLayerVoronoiZoom",
     "world.MixinWorldInfo"
   ],
