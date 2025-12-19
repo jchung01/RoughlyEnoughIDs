@@ -4,6 +4,8 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import org.dimdev.jeid.JEIDLogger;
 import org.dimdev.jeid.config.ConfigHandler;
+import org.dimdev.jeid.core.injectors.ARBiomeHandlerInjector;
+import org.dimdev.jeid.core.injectors.ChunkBiomeInjector;
 import org.dimdev.jeid.util.ASMException;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -38,6 +40,8 @@ public class JEIDTransformer implements IClassTransformer {
         for (String extraTarget : ConfigHandler.TRANSFORMER.chunkBiomeInitPatchList) {
             addTransformation(extraTarget, ChunkBiomeInjector::injectBiomeArrayInit);
         }
+
+        addTransformation("zmaster587.advancedRocketry.util.BiomeHandler", ARBiomeHandlerInjector::injectChangeBiome);
     }
 
     public void addTransformation(String key, Function<byte[], byte[]> value) {
