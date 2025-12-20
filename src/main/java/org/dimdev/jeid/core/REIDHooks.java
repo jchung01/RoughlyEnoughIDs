@@ -1,5 +1,7 @@
 package org.dimdev.jeid.core;
 
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.IChunkGenerator;
@@ -32,5 +34,21 @@ public class REIDHooks {
         for (int i = 0; i < intBiomeArray.length; ++i) {
             intBiomeArray[i] = Biome.getIdForBiome(biomes[i]);
         }
+    }
+
+    /**
+     * Set the int biome id for a certain block position.
+     * It is not this method's responsibility to make sure the change is synced to the client.
+     * @param biomeId the biome id
+     * @param world the world
+     * @param pos the block position
+     * @return the set biome id
+     */
+    public static int setBiomeId(int biomeId, World world, BlockPos pos) {
+        Chunk chunk = world.getChunk(pos);
+        int[] intBiomeArray = ((INewChunk) chunk).getIntBiomeArray();
+        intBiomeArray[(pos.getZ() & 0xF) << 4 | pos.getX() & 0xF] = biomeId;
+        chunk.markDirty();
+        return biomeId;
     }
 }
