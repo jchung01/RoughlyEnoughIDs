@@ -20,6 +20,7 @@
     "world.MixinBlockStateContainer",
     "world.MixinChunk",
     "world.MixinChunkPrimer",
+    "world.MixinGenLayerRiverMix",
     "world.MixinGenLayerVoronoiZoom",
     "world.MixinWorldInfo"
   ],

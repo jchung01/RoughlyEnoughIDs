@@ -1,5 +1,6 @@
 package org.dimdev.jeid.mixin.core.world;
 
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.block.Block;
@@ -52,12 +53,13 @@ public abstract class MixinBlockStateContainer implements INewBlockStateContaine
     @SuppressWarnings("deprecation")
     @Inject(method = "getDataForNBT", at = @At("HEAD"), cancellable = true)
     private void reid$newGetDataForNBT(byte[] blockIds, NibbleArray data, CallbackInfoReturnable<NibbleArray> cir) {
-        Reference2IntMap<IBlockState> stateIDMap = new Reference2IntOpenHashMap<>();
+        Reference2IntOpenHashMap<IBlockState> stateIDMap = new Reference2IntOpenHashMap<>();
+        stateIDMap.defaultReturnValue(-1);
         int nextID = 0;
         for (int index = 0; index < 4096; ++index) {
             IBlockState state = get(index);
-            int paletteID = stateIDMap.getOrDefault(state, -1);
-            if (paletteID == -1) {
+            int paletteID = stateIDMap.getInt(state);
+            if (paletteID == stateIDMap.defaultReturnValue()) {
                 paletteID = nextID;
                 ++nextID;
                 stateIDMap.put(state, paletteID);
@@ -67,15 +69,19 @@ public abstract class MixinBlockStateContainer implements INewBlockStateContaine
             int y = index >> 8 & 15;
             int z = index >> 4 & 15;
 
+            // Pack palette id into 12 bits (4096)
             blockIds[index] = (byte) (paletteID >> 4 & 255);
             data.set(x, y, z, paletteID & 15);
         }
 
         temporaryPalette = new int[nextID];
-        for (final Reference2IntMap.Entry<IBlockState> entry : stateIDMap.reference2IntEntrySet()) {
+        ObjectIterator<Reference2IntMap.Entry<IBlockState>> entries = stateIDMap.reference2IntEntrySet().fastIterator();
+        while (entries.hasNext()) {
+            Reference2IntMap.Entry<IBlockState> entry = entries.next();
             temporaryPalette[entry.getIntValue()] = Block.BLOCK_STATE_IDS.get(entry.getKey());
         }
 
+        // Not using "Add" for anything
         cir.setReturnValue(null);
         cir.cancel();
     }
