@@ -10,8 +10,30 @@ plugins {
     id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
 
+checkPropertyExists("apiPackage")
+
+final String javaSourceDir = 'src/main/java/'
+
+final String modGroupPath = mod_group.toString().replace('.' as char, '/' as char)
+final String apiPackagePath = apiPackage.toString().replace('.' as char, '/' as char)
+
+String targetPackageJava = javaSourceDir + modGroupPath
+
+if (!getFile(targetPackageJava).exists()) {
+    throw new GradleException("Could not resolve \"modGroup\"! Could not find ${targetPackageJava}")
+}
+
+if (apiPackage) {
+    final String endApiPath = modGroupPath + '/' + apiPackagePath
+    targetPackageJava = javaSourceDir + endApiPath
+
+    if (!getFile(targetPackageJava).exists()) {
+        throw new GradleException("Could not resolve \"apiPackage\"! Could not find ${targetPackageJava}")
+    }
+}
+
 version = project.mod_version
-group = project.maven_group
+group = project.mod_group
 archivesBaseName = 'RoughlyEnoughIDs'
 
 // Set the toolchain version to decouple the Java we run Gradle with from the Java used to compile and run the mod
@@ -82,6 +104,23 @@ tasks.injectTags.configure {
     outputClassName.set("${project.group}.${project.archives_base_name}.Tags")
 }
 
+tasks.register('apiJar', Jar) {
+    archiveClassifier.set 'api'
+    dependsOn tasks.injectTags
+
+    from(sourceSets.main.java) {
+        include "${modGroupPath}/${apiPackagePath}/**"
+    }
+    from(sourceSets.main.output) {
+        include "${modGroupPath}/${apiPackagePath}/**"
+    }
+
+    from(tasks.injectTags.outputDir) {
+        include "**/Tags.java"
+        includeEmptyDirs = false
+    }
+}
+
 repositories {
     maven {
         name 'CleanroomMC Maven'
@@ -106,25 +145,26 @@ repositories {
 }
 
 dependencies {
+    compileOnly 'org.jetbrains:annotations:26.0.2'
+
     if (project.use_assetmover.toBoolean()) {
         implementation 'com.cleanroommc:assetmover:2.5'
     }
     if (project.use_mixins.toBoolean()) {
-        implementation 'zone.rong:mixinbooter:8.0'
+        implementation 'zone.rong:mixinbooter:10.0'
     }
 
     // Example of deobfuscating a dependency
     // implementation rfg.deobf('curse.maven:had-enough-items-557549:4543375')
 
     if (project.use_mixins.toBoolean()) {
-        // Change your mixin refmap name here:
-        String mixin = modUtils.enableMixins('org.spongepowered:mixin:0.8.3', "mixins.${project.archives_base_name}.refmap.json")
+        String mixin = modUtils.enableMixins("zone.rong:mixinbooter:${project.mixin_booter_version}", "mixins.${project.archives_base_name}.refmap.json")
         api (mixin) {
             transitive = false
         }
         annotationProcessor 'org.ow2.asm:asm-debug-all:5.2'
-        annotationProcessor 'com.google.guava:guava:24.1.1-jre'
-        annotationProcessor 'com.google.code.gson:gson:2.8.6'
+        annotationProcessor 'com.google.guava:guava:32.1.2-jre'
+        annotationProcessor 'com.google.code.gson:gson:2.8.9'
         annotationProcessor (mixin) {
             transitive = false
         }
@@ -259,4 +299,14 @@ idea {
 
 tasks.named("processIdeaSettings").configure {
     dependsOn("injectTags")
+}
+
+def getFile(String relativePath) {
+    return new File(projectDir, relativePath)
+}
+
+def checkPropertyExists(String propertyName) {
+    if (!project.hasProperty(propertyName)) {
+        throw new GradleException("This project requires a property \"" + propertyName + "\"! Please add it to \"gradle.properties\".")
+    }
 }
