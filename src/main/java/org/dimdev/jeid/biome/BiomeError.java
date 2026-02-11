@@ -1,23 +1,44 @@
 package org.dimdev.jeid.biome;
 
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeVoid;
+
+import net.minecraftforge.fml.common.event.FMLModIdMappingEvent;
+import net.minecraftforge.registries.GameData;
+import net.minecraftforge.registries.IForgeRegistry;
 import org.dimdev.jeid.JEID;
 
+import java.util.List;
+
 public class BiomeError extends BiomeVoid {
-    private static BiomeError INSTANCE;
+    public static final String NAME = "error_biome";
+    private int id = -1;
 
-    private BiomeError(String idName, String propName) {
-        super(new BiomeProperties(propName));
-        this.setRegistryName(JEID.MODID, idName);
+    public BiomeError() {
+        super(new BiomeProperties("A mod doesn't support extended biome IDs -- report to REID").setRainDisabled());
     }
 
-    public static void createInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new BiomeError("error_biome", "A mod doesn't support extended biome IDs -- report to REID");
-        }
+    public int getId() {
+        return id;
     }
 
-    public static BiomeError getInstance() {
-        return BiomeError.INSTANCE;
+    private void setId(int id) {
+        this.id = id;
+    }
+
+    public void register(IForgeRegistry<Biome> registry) {
+        registry.register(this.setRegistryName(new ResourceLocation(JEID.MODID, NAME)));
+        setId(Biome.getIdForBiome(this));
+    }
+
+    public void updateMapping(FMLModIdMappingEvent event) {
+        List<FMLModIdMappingEvent.ModRemapping> remaps = event.getRemaps(GameData.BIOMES);
+        if (remaps == null) return;
+
+        remaps.stream()
+                .filter(remap -> remap.key.equals(new ResourceLocation(JEID.MODID, NAME)))
+                .findFirst()
+                .ifPresent(remap -> setId(remap.newId));
     }
 }

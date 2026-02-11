@@ -8,7 +8,7 @@ public interface BiomeAccessor {
 
     Chunk getChunk();
 
-    int getSize();
+    int size();
 
     int getBiomeId(BlockPos pos);
 

@@ -1,18 +1,14 @@
 package org.dimdev.jeid.impl.type;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.ints.IntLists;
-import org.dimdev.jeid.api.type.IBiomeContainer;
-import org.dimdev.jeid.biome.BiomeError;
+import org.dimdev.jeid.api.biome.BiomeAccessor;
+import org.dimdev.jeid.init.REIDBiomes;
 
 import java.util.Arrays;
 
-public class BiomeContainer implements IBiomeContainer {
+public class BiomeContainer implements BiomeAccessor {
     private static final int NUM_BIOMES = 16 * 16;
     private final Chunk chunk;
     private final int[] biomes;
@@ -43,7 +39,7 @@ public class BiomeContainer implements IBiomeContainer {
     }
 
     @Override
-    public int getSize() {
+    public int size() {
         return NUM_BIOMES;
     }
 
@@ -57,12 +53,10 @@ public class BiomeContainer implements IBiomeContainer {
         return biomes[getIndex(relativeX, relativeZ)];
     }
 
-    @Override
     public void setBiome(BlockPos pos, int biomeId) {
         setBiome(pos.getX() & 0xF, pos.getZ() & 0xF, biomeId);
     }
 
-    @Override
     public void setBiome(int relativeX, int relativeZ, int biomeId) {
         biomes[getIndex(relativeX, relativeZ)] = biomeId;
     }
@@ -71,19 +65,17 @@ public class BiomeContainer implements IBiomeContainer {
         biomes[index] = biomeId;
     }
 
-    @Override
     public void setBiomes(int[] biomes) {
         System.arraycopy(biomes, 0, this.biomes, 0, this.biomes.length);
     }
 
-    @Override
     public void fill(int biomeId) {
         Arrays.fill(biomes, biomeId);
     }
 
     public byte[] dummy() {
         byte[] dummy = new byte[NUM_BIOMES];
-        Arrays.fill(dummy, (byte) Biome.REGISTRY.getIDForObject(BiomeError.getInstance()));
+        Arrays.fill(dummy, (byte) REIDBiomes.ERROR.getId());
         return dummy;
     }
 }

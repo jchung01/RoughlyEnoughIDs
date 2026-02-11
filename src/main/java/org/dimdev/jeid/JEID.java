@@ -3,10 +3,10 @@ package org.dimdev.jeid;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLModIdMappingEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import org.dimdev.jeid.biome.BiomeError;
 import org.dimdev.jeid.debug.RegistryDebug;
+import org.dimdev.jeid.init.REIDBiomes;
 import org.dimdev.jeid.jeid.Tags;
 import org.dimdev.jeid.network.MessageManager;
 import org.dimdev.jeid.proxy.IProxy;
@@ -55,9 +55,13 @@ public class JEID {
         // Register messages
         MessageManager.init();
         // Register Error Biome
-        BiomeError.createInstance();
-        ForgeRegistries.BIOMES.register(BiomeError.getInstance());
+        MinecraftForge.EVENT_BUS.register(REIDBiomes.class);
         // Debug code
         MinecraftForge.EVENT_BUS.register(new RegistryDebug());
+    }
+
+    @Mod.EventHandler
+    public void onRemap(FMLModIdMappingEvent event) {
+        REIDBiomes.ERROR.updateMapping(event);
     }
 }
