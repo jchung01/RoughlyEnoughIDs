@@ -10,12 +10,12 @@ plugins {
     id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
 
-checkPropertyExists("apiPackage")
+checkPropertyExists("api_package")
 
 final String javaSourceDir = 'src/main/java/'
 
 final String modGroupPath = mod_group.toString().replace('.' as char, '/' as char)
-final String apiPackagePath = apiPackage.toString().replace('.' as char, '/' as char)
+final String apiPackagePath = api_package.toString().replace('.' as char, '/' as char)
 
 String targetPackageJava = javaSourceDir + modGroupPath
 
@@ -23,7 +23,7 @@ if (!getFile(targetPackageJava).exists()) {
     throw new GradleException("Could not resolve \"modGroup\"! Could not find ${targetPackageJava}")
 }
 
-if (apiPackage) {
+if (api_package) {
     final String endApiPath = modGroupPath + '/' + apiPackagePath
     targetPackageJava = javaSourceDir + endApiPath
 
@@ -87,6 +87,9 @@ minecraft {
     injectedTags.put('MOD_ID', project.archives_base_name)
     injectedTags.put('MOD_NAME', project.mod_name)
     injectedTags.put('VERSION', project.version)
+
+    injectedTags.put('API_NAME', project.api_name)
+    injectedTags.put('API_VERSION', project.api_version)
 }
 
 // Don't add coremod arg to runDeobf tasks
@@ -106,7 +109,7 @@ tasks.injectTags.configure {
 
 tasks.register('apiJar', Jar) {
     archiveClassifier.set 'api'
-    dependsOn tasks.injectTags
+    dependsOn tasks.compileInjectedTagsJava
 
     from(sourceSets.main.java) {
         include "${modGroupPath}/${apiPackagePath}/**"
@@ -115,9 +118,8 @@ tasks.register('apiJar', Jar) {
         include "${modGroupPath}/${apiPackagePath}/**"
     }
 
-    from(tasks.injectTags.outputDir) {
-        include "**/Tags.java"
-        includeEmptyDirs = false
+    from(tasks.compileInjectedTagsJava.outputs) {
+        include "**/Tags.class"
     }
 }
 
