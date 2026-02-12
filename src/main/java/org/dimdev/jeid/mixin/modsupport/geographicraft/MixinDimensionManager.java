@@ -5,7 +5,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 
 import climateControl.DimensionManager;
-import org.dimdev.jeid.ducks.INewChunk;
+import org.dimdev.jeid.api.BiomeApi;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,9 +19,11 @@ public class MixinDimensionManager {
      */
     @Inject(method = "hasOnlySea", at = @At(value = "HEAD"), cancellable = true)
     private void reid$rewriteHasOnlySea(Chunk tested, CallbackInfoReturnable<Boolean> cir) {
-        for (int biome : ((INewChunk) tested).getIntBiomeArray()) {
+        final int[] biomes = BiomeApi.INSTANCE.getBiomeAccessor(tested).getBiomes();
+        for (int biome : biomes) {
             if (biome != 0 && biome != Biome.getIdForBiome(Biomes.DEEP_OCEAN)) {
                 cir.setReturnValue(false);
+                return;
             }
         }
         cir.setReturnValue(true);

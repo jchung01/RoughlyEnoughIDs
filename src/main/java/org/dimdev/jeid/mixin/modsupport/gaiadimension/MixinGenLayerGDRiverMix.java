@@ -1,6 +1,7 @@
 package org.dimdev.jeid.mixin.modsupport.gaiadimension;
 
 import androsa.gaiadimension.world.layer.GenLayerGDRiverMix;
+import org.dimdev.jeid.api.BiomeApi;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
@@ -9,6 +10,6 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 public class MixinGenLayerGDRiverMix {
     @ModifyConstant(method = "getInts", constant = @Constant(intValue = 255))
     private int getBitMask(int oldValue) {
-        return 0xFFFFFFFF;
+        return BiomeApi.INSTANCE.getIdentityMask();
     }
 }

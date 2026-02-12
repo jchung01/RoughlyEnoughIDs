@@ -1,14 +1,19 @@
 package org.dimdev.jeid.mixin.modsupport.compactmachines;
 
-import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
+import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraftforge.common.util.Constants;
 import org.dave.compactmachines3.utility.ChunkUtils;
 import org.dimdev.jeid.JEID;
+import org.dimdev.jeid.api.BiomeApi;
 import org.dimdev.jeid.ducks.INewBlockStateContainer;
-import org.dimdev.jeid.ducks.INewChunk;
+import org.dimdev.jeid.impl.BiomeApiImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -35,7 +40,8 @@ public class MixinChunkUtils {
         if (!key.equals("Biomes")) {
             throw new AssertionError(JEID.MODID + " :: NBTTagCompound#setByteArray key of writeChunkToNBT isn't \"Biomes\"");
         }
-        instance.setIntArray(key, ((INewChunk) chunkIn).getIntBiomeArray());
+
+        instance.setIntArray(key, BiomeApiImpl.getInternalBiomeArray(chunkIn));
     }
 
     @Inject(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;getByteArray(Ljava/lang/String;)[B", ordinal = 0, remap = true))
@@ -44,8 +50,21 @@ public class MixinChunkUtils {
         ((INewBlockStateContainer) extendedBlockStorage.getData()).setTemporaryPalette(palette);
     }
 
-    @Redirect(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setBiomeArray([B)V", remap = true))
-    private static void reid$setBiomeArray(Chunk instance, byte[] original, World worldIn, NBTTagCompound compound) {
-        ((INewChunk) instance).setIntBiomeArray(compound.getIntArray("Biomes"));
+    @Definition(id = "compound", local = @Local(type = NBTTagCompound.class, argsOnly = true))
+    @Definition(id = "hasKey", method = "Lnet/minecraft/nbt/NBTTagCompound;hasKey(Ljava/lang/String;I)Z")
+    @Expression("compound.hasKey('Biomes', 7)")
+    @Inject(method = "readChunkFromNBT", at = @At(value = "MIXINEXTRAS:EXPRESSION"))
+    private static void reid$setBiomeArray(World worldIn, NBTTagCompound nbt, CallbackInfoReturnable<Chunk> cir) {
+        if (nbt.hasKey("Biomes", Constants.NBT.TAG_INT_ARRAY)) {
+            BiomeApi.INSTANCE.replaceBiomes(cir.getReturnValue(), nbt.getIntArray("Biomes"));
+        } else {
+            // Convert old chunks
+            int[] intBiomeArray = new int[256];
+            int index = 0;
+            for (byte b : nbt.getByteArray("Biomes")) {
+                intBiomeArray[index++] = b & 0xFF;
+            }
+            BiomeApi.INSTANCE.replaceBiomes(cir.getReturnValue(), intBiomeArray);
+        }
     }
 }
