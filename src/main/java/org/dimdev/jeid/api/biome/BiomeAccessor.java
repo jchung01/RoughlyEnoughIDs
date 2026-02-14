@@ -4,11 +4,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 
 public interface BiomeAccessor {
-    int[] getBiomes();
+    int size();
 
     Chunk getChunk();
 
-    int size();
+    int[] getBiomes();
 
     int getBiomeId(BlockPos pos);
 

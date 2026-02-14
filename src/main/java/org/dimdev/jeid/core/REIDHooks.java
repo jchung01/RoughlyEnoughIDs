@@ -10,6 +10,8 @@ import org.dimdev.jeid.ducks.ICustomBiomesForGeneration;
 import org.dimdev.jeid.ducks.IModSupportsJEID;
 import org.dimdev.jeid.ducks.INewChunk;
 
+import javax.annotation.Nullable;
+
 public class REIDHooks {
     private static final Biome[] reusableBiomeList = new Biome[256];
 
@@ -17,7 +19,7 @@ public class REIDHooks {
      * Initialize biome array after any calls to {@link net.minecraft.world.gen.IChunkGenerator#generateChunk}.
      * This guarantees the correct biomes even for modded chunk generators.
      */
-    public static void initializeBiomeArray(Chunk chunk, IChunkGenerator chunkGenerator) {
+    public static void initializeBiomeArray(Chunk chunk, @Nullable IChunkGenerator chunkGenerator) {
         if (chunkGenerator instanceof IModSupportsJEID) {
             return;
         }

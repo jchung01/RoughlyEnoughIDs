@@ -5,32 +5,41 @@ import net.minecraft.world.chunk.Chunk;
 
 import org.dimdev.jeid.api.biome.BiomeAccessor;
 import org.dimdev.jeid.init.REIDBiomes;
+import org.dimdev.jeid.util.Lazy;
 
 import java.util.Arrays;
 
 public class BiomeContainer implements BiomeAccessor {
-    private static final int NUM_BIOMES = 16 * 16;
     private final Chunk chunk;
-    private final int[] biomes;
+    private final int numBiomes;
+    private final Lazy<int[]> biomes;
 
-    public BiomeContainer(Chunk chunk) {
+    public BiomeContainer(Chunk chunk, int numBiomes) {
         this.chunk = chunk;
+        this.numBiomes = numBiomes;
 
-        biomes = new int[NUM_BIOMES];
-        Arrays.fill(biomes, -1);
+        biomes = Lazy.of(() -> {
+            int[] biomes = new int[numBiomes];
+            Arrays.fill(biomes, -1);
+            return biomes;
+        });
     }
 
     private int getIndex(int x, int z) {
         return (z << 4) | x;
     }
 
+    public boolean isInitialized() {
+        return biomes.isInitialized();
+    }
+
     public int[] getInternalBiomes() {
-        return biomes;
+        return biomes.get();
     }
 
     @Override
-    public int[] getBiomes() {
-        return Arrays.copyOf(biomes, biomes.length);
+    public int size() {
+        return numBiomes;
     }
 
     @Override
@@ -39,8 +48,8 @@ public class BiomeContainer implements BiomeAccessor {
     }
 
     @Override
-    public int size() {
-        return NUM_BIOMES;
+    public int[] getBiomes() {
+        return Arrays.copyOf(biomes.get(), size());
     }
 
     @Override
@@ -50,7 +59,11 @@ public class BiomeContainer implements BiomeAccessor {
 
     @Override
     public int getBiomeId(int relativeX, int relativeZ) {
-        return biomes[getIndex(relativeX, relativeZ)];
+        return getBiomeId(getIndex(relativeX, relativeZ));
+    }
+
+    public int getBiomeId(int index) {
+        return biomes.get()[index];
     }
 
     public void setBiome(BlockPos pos, int biomeId) {
@@ -58,23 +71,23 @@ public class BiomeContainer implements BiomeAccessor {
     }
 
     public void setBiome(int relativeX, int relativeZ, int biomeId) {
-        biomes[getIndex(relativeX, relativeZ)] = biomeId;
+        biomes.get()[getIndex(relativeX, relativeZ)] = biomeId;
     }
 
     public void setBiome(int index, int biomeId) {
-        biomes[index] = biomeId;
+        biomes.get()[index] = biomeId;
     }
 
     public void setBiomes(int[] biomes) {
-        System.arraycopy(biomes, 0, this.biomes, 0, this.biomes.length);
+        System.arraycopy(biomes, 0, this.biomes.get(), 0, size());
     }
 
     public void fill(int biomeId) {
-        Arrays.fill(biomes, biomeId);
+        Arrays.fill(biomes.get(), biomeId);
     }
 
     public byte[] dummy() {
-        byte[] dummy = new byte[NUM_BIOMES];
+        byte[] dummy = new byte[size()];
         Arrays.fill(dummy, (byte) REIDBiomes.ERROR.getId());
         return dummy;
     }

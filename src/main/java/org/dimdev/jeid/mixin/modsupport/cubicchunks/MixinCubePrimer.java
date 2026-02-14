@@ -1,8 +1,9 @@
 package org.dimdev.jeid.mixin.modsupport.cubicchunks;
 
-import io.github.opencubicchunks.cubicchunks.api.worldgen.CubePrimer;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+
+import io.github.opencubicchunks.cubicchunks.api.worldgen.CubePrimer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;

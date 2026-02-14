@@ -7,12 +7,12 @@ import com.google.common.base.Preconditions;
 import org.dimdev.jeid.api.BiomeApi;
 import org.dimdev.jeid.api.REIDApi;
 import org.dimdev.jeid.api.biome.BiomeAccessor;
-import org.dimdev.jeid.ducks.INewChunk;
 import org.dimdev.jeid.impl.type.BiomeContainer;
+import org.dimdev.jeid.impl.type.BiomeStorage;
 
 public class BiomeApiImpl implements BiomeApi {
     public BiomeContainer getBiomeContainer(Chunk chunk) {
-        return ((INewChunk) chunk).reid$getBiomes();
+        return ((BiomeStorage) chunk).reid$getBiomes();
     }
 
     @Override

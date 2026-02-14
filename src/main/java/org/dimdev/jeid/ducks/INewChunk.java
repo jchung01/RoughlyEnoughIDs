@@ -1,13 +1,11 @@
 package org.dimdev.jeid.ducks;
 
-import org.dimdev.jeid.impl.type.BiomeContainer;
+import org.dimdev.jeid.impl.type.BiomeStorage;
 
 /**
  * Duck interface for Chunk mixins.
  */
-public interface INewChunk {
-    BiomeContainer reid$getBiomes();
-
+public interface INewChunk extends BiomeStorage {
     @Deprecated
     int[] getIntBiomeArray();
 

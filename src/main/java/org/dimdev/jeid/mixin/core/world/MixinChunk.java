@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Chunk.class)
 public abstract class MixinChunk implements INewChunk {
     @Unique
-    private BiomeContainer reid$biomeContainer = new BiomeContainer((Chunk) (Object) this);
+    private BiomeContainer reid$biomeContainer = new BiomeContainer((Chunk) (Object) this, 16 * 16);
 
     @Unique
     @Override
@@ -49,7 +49,7 @@ public abstract class MixinChunk implements INewChunk {
      * Get biome from REID biome array.
      */
     @Definition(id = "blockBiomeArray", field = "Lnet/minecraft/world/chunk/Chunk;blockBiomeArray:[B")
-    @Expression("@(this.blockBiomeArray[?] & 255)")
+    @Expression("this.blockBiomeArray[?] & 255")
     @ModifyExpressionValue(method = "getBiome", at = @At("MIXINEXTRAS:EXPRESSION"))
     private int reid$fromIntBiomeArray(int original, @Local(name = "i") int i, @Local(name = "j") int j ) {
         return reid$biomeContainer.getBiomeId(i, j);
