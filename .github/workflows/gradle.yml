@@ -14,9 +14,9 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-java@v4
         with:
+          java-version: '25'
           distribution: 'zulu'
-          java-version: '8'
-          cache: 'gradle'
+          cache: gradle
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build the mod
