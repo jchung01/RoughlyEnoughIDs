@@ -3,3 +3,45 @@
 
 // If you wish to use the default helper methods, uncomment the line below
 // apply from: 'gradle/scripts/helpers.gradle'
+
+assertProperty("api_package")
+
+final String javaSourceDir = 'src/main/java/'
+
+final String modGroupPath = root_package.toString().replace('.' as char, '/' as char)
+final String apiPackagePath = api_package.toString().replace('.' as char, '/' as char)
+
+String targetPackageJava = javaSourceDir + modGroupPath
+
+if (!getFile(targetPackageJava).exists()) {
+    throw new GradleException("Could not resolve \"modGroup\"! Could not find ${targetPackageJava}")
+}
+
+if (api_package) {
+    final String endApiPath = modGroupPath + '/' + apiPackagePath
+    targetPackageJava = javaSourceDir + endApiPath
+
+    if (!getFile(targetPackageJava).exists()) {
+        throw new GradleException("Could not resolve \"apiPackage\"! Could not find ${targetPackageJava}")
+    }
+}
+
+tasks.register('apiJar', Jar) {
+    archiveClassifier.set 'api'
+    dependsOn tasks.compileInjectedTagsJava
+
+    from(sourceSets.main.java) {
+        include "${modGroupPath}/${apiPackagePath}/**"
+    }
+    from(sourceSets.main.output) {
+        include "${modGroupPath}/${apiPackagePath}/**"
+    }
+
+    from(tasks.compileInjectedTagsJava.outputs) {
+        include "**/Tags.class"
+    }
+}
+
+def getFile(String relativePath) {
+    return new File(projectDir, relativePath)
+}
