@@ -1,0 +1,111 @@
+apply from: 'gradle/scripts/helpers.gradle'
+
+repositories {
+    // Other repositories described by default:
+    // CleanroomMC: https://maven.cleanroommc.com
+    exclusiveContent {
+        forRepository {
+            maven {
+                name 'CurseMaven'
+                url 'https://cursemaven.com'
+            }
+        }
+        filter {
+            includeGroup 'curse.maven'
+        }
+    }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name 'Modrinth'
+                url 'https://api.modrinth.com/maven'
+            }
+        }
+        filter {
+            includeGroup 'maven.modrinth'
+        }
+    }
+    mavenLocal() // Must be last for caching to work
+}
+
+dependencies {
+    // Include StripLatestForgeRequirements by default for the dev env, saves everyone a hassle
+    runtimeOnly 'com.cleanroommc:strip-latest-forge-requirements:1.0'
+    // Include OSXNarratorBlocker by default for the dev env, for M1+ Macs
+    runtimeOnly 'com.cleanroommc:osxnarratorblocker:1.0'
+
+    // Example - Dependency descriptor:
+    // 'com.google.code.gson:gson:2.8.6' << group: com.google.code.gson, name:gson, version:2.8.6
+    // 'group:name:version:classifier' where classifier is optional
+
+    // Example - Deobfuscating dependencies:
+    // rfg.deobf('curse.maven:had-enough-items-557549:4543375')
+    // By wrapping a dependency descriptor in rfg.deobf() method call, the dependency is queued for deobfuscation
+    // When deobfuscating, RFG respects the mapping_channel + mapping_version stated in gradle.properties
+
+    // Example - CurseMaven dependencies:
+    // 'curse.maven:had-enough-items-557549:4543375' << had-enough-items = project slug, 557549 = project id, 4543375 = file id
+    // Full documentation: https://cursemaven.com/
+
+    // Example - Modrinth dependencies:
+    // 'maven.modrinth:jei:4.16.1.1000' << jei = project name, 4.16.1.1000 = file version
+    // Full documentation: https://docs.modrinth.com/docs/tutorials/maven/
+
+    // Common dependency types (configuration):
+    // implementation = dependency available at both compile time and runtime
+    // runtimeOnly = runtime dependency
+    // compileOnly = compile time dependency
+    // annotationProcessor = annotation processing dependencies
+    // embed = bundle dependencies into final output artifact (no relocation)
+
+    // Transitive dependencies:
+    // (Dependencies that your dependency depends on)
+    // If you wish to exclude transitive dependencies in the described dependencies
+    // Use a closure as such:
+    // implementation ('com.google.code.gson:gson:2.8.6') {
+    //     transitive = false
+    // }
+    compileOnly rfg.deobf("maven.modrinth:scapeandrunparasites:1.10.2")
+    compileOnly rfg.deobf("maven.modrinth:wyrms:0.5.124")
+    compileOnly rfg.deobf("curse.maven:biomes-o-plenty-220318:2842510")
+    compileOnly rfg.deobf("curse.maven:twilightforest-227639:3051450")
+    compileOnly rfg.deobf("curse.maven:thaumcraft-223628:2629023")
+    compileOnly rfg.deobf("curse.maven:abyssalcraft-53686:3425234")
+    compileOnly rfg.deobf("curse.maven:creeping-nether-268104:2655432")
+    compileOnly rfg.deobf("curse.maven:geographicraft-76544:2497541")
+    compileOnly rfg.deobf("curse.maven:mystcraft-224599:2958490")
+    compileOnly rfg.deobf("curse.maven:hammercore-247401:3366814")
+    // Advanced Rocketry 1.7.0
+    compileOnly rfg.deobf("curse.maven:advancedrocketry-236542:3015079")
+    compileOnly rfg.deobf("curse.maven:libvulpes-236541:3434864")
+    compileOnly rfg.deobf("curse.maven:worldedit-225608:2941712")
+    compileOnly rfg.deobf("curse.maven:journeymap-32274:2916002")
+    compileOnly rfg.deobf("curse.maven:bookshelf-228525:2836960")
+    compileOnly rfg.deobf("curse.maven:cyclopscore-232758:3159497")
+    compileOnly rfg.deobf("curse.maven:extrautils2-225561:2678374")
+    compileOnly rfg.deobf("curse.maven:betweenlands-243363:3248202")
+    compileOnly rfg.deobf("curse.maven:tofucraftreload-317469:3115668")
+    compileOnly rfg.deobf("curse.maven:tropicraft-254794:2713918")
+    compileOnly rfg.deobf("curse.maven:gaiadimension-302529:2724738")
+    compileOnly rfg.deobf("curse.maven:biometweaker-228895:3112142")
+    compileOnly rfg.deobf("curse.maven:baubles-227083:2518667")
+    compileOnly rfg.deobf("curse.maven:patchouli-306770:3162874")
+    compileOnly rfg.deobf("curse.maven:bewitchment-285439:3256343")
+    compileOnly rfg.deobf("curse.maven:compact-machines-224218:2707509")
+    compileOnly rfg.deobf("curse.maven:moreplanets-261990:5063201")
+    compileOnly rfg.deobf("curse.maven:atum2-59621:3116599")
+    compileOnly rfg.deobf("curse.maven:naturescompass-252848:2893527")
+    compileOnly rfg.deobf("curse.maven:biomestaff-299907:2597577")
+    compileOnly rfg.deobf("curse.maven:kathairis-291129:2710928")
+
+    compileOnly rfg.deobf("curse.maven:cubicchunks-292243:5135427")
+    // RTG+ should also work
+    compileOnly rfg.deobf("curse.maven:rtg-unofficial-648514:4696300")
+    compileOnly rfg.deobf("curse.maven:chunk-pregenerator-267193:5632153")
+
+    // Chunk Pregenerator dependency
+    // runtimeOnly "curse.maven:carbon-config-898104:5504476"
+    // implementation "curse.maven:LibVulpes-236541:3801015"
+    // implementation "curse.maven:Baubles-227083:2518667"
+    // implementation "curse.maven:mm-library-368098:3254750"
+}
