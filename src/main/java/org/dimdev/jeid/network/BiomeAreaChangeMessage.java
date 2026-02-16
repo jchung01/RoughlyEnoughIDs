@@ -65,7 +65,7 @@ public class BiomeAreaChangeMessage implements IMessage {
                         Chunk chunk = world.getChunk(pos);
                         int biomeIdAtPos = BiomeApi.INSTANCE.getBiomeAccessor(chunk).getBiomeId(relativeX, relativeZ);
                         if (biomeIdAtPos != message.biomeId) {
-                            BiomeApi.INSTANCE.updateBiome(chunk, pos, biomeIdAtPos);
+                            BiomeApi.INSTANCE.updateBiome(chunk, pos, message.biomeId);
                         }
                     }
                 }
