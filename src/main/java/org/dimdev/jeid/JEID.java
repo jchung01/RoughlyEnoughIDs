@@ -43,7 +43,7 @@ public class JEID {
         + "after:tofucraft;"
         + "after:tropicraft;"
         + "after:twilightforest;"
-        + "after:wyrmsofnyrus;"
+        + "after:wyrmsofnyrus@[0.8,);"
         + "after:worldedit";
     @SidedProxy(clientSide = "org.dimdev.jeid.proxy.ClientProxy", serverSide = "org.dimdev.jeid.proxy.ServerProxy")
     public static IProxy proxy;
