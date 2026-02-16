@@ -32,6 +32,9 @@ public class BiomeApiImpl implements BiomeApi {
 
     @Override
     public void updateBiome(Chunk chunk, BlockPos pos, int biomeId) {
+        Preconditions.checkArgument(pos.getX() >> 4 == chunk.x);
+        Preconditions.checkArgument(pos.getZ() >> 4 == chunk.z);
+
         getBiomeContainer(chunk).setBiome(pos, biomeId);
         chunk.markDirty();
     }
