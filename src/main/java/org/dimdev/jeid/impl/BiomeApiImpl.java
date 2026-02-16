@@ -20,6 +20,11 @@ public class BiomeApiImpl implements BiomeApi {
         return getBiomeContainer(chunk);
     }
 
+    /**
+     * Allocation-less access to the chunk's biome array. Take care not to modify its contents.
+     * Provided here for usage in hot paths (mainly vanilla).
+     * @return the backing array of biomes
+     */
     public static int[] getInternalBiomeArray(Chunk chunk) {
         if (BiomeApi.INSTANCE instanceof BiomeApiImpl) {
             BiomeContainer biomeContainer = ((BiomeApiImpl) BiomeApi.INSTANCE).getBiomeContainer(chunk);

@@ -8,8 +8,10 @@ import net.minecraft.world.chunk.NibbleArray;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.dimdev.jeid.JEID;
+import org.dimdev.jeid.api.BiomeApi;
 import org.dimdev.jeid.ducks.INewBlockStateContainer;
 import org.dimdev.jeid.ducks.INewChunk;
+import org.dimdev.jeid.impl.BiomeApiImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -47,7 +49,7 @@ public class MixinAnvilChunkLoader {
     private void reid$readBiomeArray(World world, NBTTagCompound nbt, CallbackInfoReturnable<Chunk> cir, @Local Chunk chunk) {
         INewChunk newChunk = (INewChunk) chunk;
         if (nbt.hasKey("Biomes", 11)) {
-            newChunk.setIntBiomeArray(nbt.getIntArray("Biomes"));
+            BiomeApi.INSTANCE.replaceBiomes(chunk, nbt.getIntArray("Biomes"));
         } else {
             // Convert old chunks
             int[] intBiomeArray = new int[256];
@@ -55,7 +57,7 @@ public class MixinAnvilChunkLoader {
             for (byte b : nbt.getByteArray("Biomes")) {
                 intBiomeArray[index++] = b & 0xFF;
             }
-            newChunk.setIntBiomeArray(intBiomeArray);
+            BiomeApi.INSTANCE.replaceBiomes(chunk, intBiomeArray);
         }
     }
 
@@ -72,7 +74,7 @@ public class MixinAnvilChunkLoader {
         if (!key.equals("Biomes")) {
             throw new AssertionError(JEID.MODID + " :: Sliced target setByteArray isn't \"Biomes\"");
         }
-        instance.setIntArray(key, ((INewChunk) chunkIn).getIntBiomeArray());
+        instance.setIntArray(key, BiomeApiImpl.getInternalBiomeArray(chunkIn));
     }
 
     /**

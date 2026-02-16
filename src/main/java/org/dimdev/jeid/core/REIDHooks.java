@@ -6,6 +6,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.IChunkGenerator;
 
+import org.dimdev.jeid.api.BiomeApi;
 import org.dimdev.jeid.ducks.ICustomBiomesForGeneration;
 import org.dimdev.jeid.ducks.IModSupportsJEID;
 import org.dimdev.jeid.ducks.INewChunk;
@@ -31,11 +32,11 @@ public class REIDHooks {
         else {
             biomes = chunk.getWorld().getBiomeProvider().getBiomes(reusableBiomeList, chunk.x * 16, chunk.z * 16, 16, 16);
         }
-        INewChunk newChunk = (INewChunk) chunk;
-        int[] intBiomeArray = newChunk.getIntBiomeArray();
-        for (int i = 0; i < intBiomeArray.length; ++i) {
-            intBiomeArray[i] = Biome.getIdForBiome(biomes[i]);
+        int[] biomeIds = new int[256];
+        for (int i = 0; i < biomeIds.length; ++i) {
+            biomeIds[i] = Biome.getIdForBiome(biomes[i]);
         }
+        BiomeApi.INSTANCE.replaceBiomes(chunk, biomeIds);
     }
 
     /**
@@ -47,10 +48,7 @@ public class REIDHooks {
      * @return the set biome id
      */
     public static int setBiomeId(int biomeId, World world, BlockPos pos) {
-        Chunk chunk = world.getChunk(pos);
-        int[] intBiomeArray = ((INewChunk) chunk).getIntBiomeArray();
-        intBiomeArray[(pos.getZ() & 0xF) << 4 | pos.getX() & 0xF] = biomeId;
-        chunk.markDirty();
+        BiomeApi.INSTANCE.updateBiome(world.getChunk(pos), pos, biomeId);
         return biomeId;
     }
 }

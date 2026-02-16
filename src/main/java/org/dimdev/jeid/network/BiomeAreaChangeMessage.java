@@ -5,12 +5,12 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
+
+import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-
-import io.netty.buffer.ByteBuf;
-import org.dimdev.jeid.ducks.INewChunk;
+import org.dimdev.jeid.api.BiomeApi;
 
 public class BiomeAreaChangeMessage implements IMessage {
     private int x;
@@ -53,13 +53,19 @@ public class BiomeAreaChangeMessage implements IMessage {
                 int x = message.x;
                 int z = message.z;
                 int rad = message.radius;
+                BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(x, 0, z);
                 for(int ix = x - rad; ix <= x + rad; ++ix) {
+                    int relativeX = ix & 0xF;
+                    pos.setPos(ix, pos.getY(), pos.getZ());
+
                     for(int iz = z - rad; iz <= z + rad; ++iz) {
-                        Chunk chunk = world.getChunk(new BlockPos(ix, 0, iz));
-                        int[] biomeArray = ((INewChunk) chunk).getIntBiomeArray();
-                        int biomeIdAtPos = biomeArray[(iz & 0xF) << 4 | (ix & 0xF)];
+                        int relativeZ = iz & 0xF;
+                        pos.setPos(pos.getX(), pos.getY(), iz);
+
+                        Chunk chunk = world.getChunk(pos);
+                        int biomeIdAtPos = BiomeApi.INSTANCE.getBiomeAccessor(chunk).getBiomeId(relativeX, relativeZ);
                         if (biomeIdAtPos != message.biomeId) {
-                            biomeArray[(iz & 0xF) << 4 | (ix & 0xF)] = message.biomeId;
+                            BiomeApi.INSTANCE.updateBiome(chunk, pos, biomeIdAtPos);
                         }
                     }
                 }

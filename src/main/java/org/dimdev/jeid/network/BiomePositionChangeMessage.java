@@ -1,15 +1,16 @@
 package org.dimdev.jeid.network;
 
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
+
+import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import org.dimdev.jeid.ducks.INewChunk;
+import org.dimdev.jeid.api.BiomeApi;
 
 public class BiomePositionChangeMessage implements IMessage {
     private int x;
@@ -45,9 +46,10 @@ public class BiomePositionChangeMessage implements IMessage {
         public IMessage onMessage(BiomePositionChangeMessage message, MessageContext ctx) {
             Minecraft.getMinecraft().addScheduledTask(() -> {
                 WorldClient world = Minecraft.getMinecraft().world;
-                Chunk chunk = world.getChunk(new BlockPos(message.x, 0, message.z));
-                ((INewChunk) chunk).getIntBiomeArray()[(message.z & 15) << 4 | message.x & 15] = message.biomeId;
-                world.markBlockRangeForRenderUpdate(new BlockPos(message.x, 0, message.z), new BlockPos(message.x, world.getHeight(), message.z));
+                BlockPos pos = new BlockPos(message.x, 0, message.z);
+                Chunk chunk = world.getChunk(pos);
+                BiomeApi.INSTANCE.updateBiome(chunk, pos, message.biomeId);
+                world.markBlockRangeForRenderUpdate(pos, new BlockPos(message.x, world.getHeight(), message.z));
             });
             return null;
         }
