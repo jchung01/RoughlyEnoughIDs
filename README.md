@@ -1,5 +1,5 @@
 # Roughly Enough IDs
-![Modrinth: Roughly Enough IDs](https://img.shields.io/modrinth/v/reid?logo=modrinth&label=RoughlyEnoughIDs&link=https%3A%2F%2Fmodrinth.com%2Fmod%2Freid) ![CurseForge: Roughly Enough IDs](https://img.shields.io/curseforge/v/629017?logo=curseforge&label=RoughlyEnoughIDs&link=https%3A%2F%2Fwww.curseforge.com%2Fminecraft%2Fmc-mods%2Freid)
+[![Modrinth: Roughly Enough IDs](https://img.shields.io/modrinth/v/reid?logo=modrinth&label=RoughlyEnoughIDs)](https://modrinth.com/mod/reid) [![CurseForge: Roughly Enough IDs](https://img.shields.io/curseforge/v/629017?logo=curseforge&label=RoughlyEnoughIDs)](https://curseforge.com/minecraft/mc-mods/reid)
 
 <img src="src/main/resources/assets/reid/logo.png" width="128" height="128" alt="RoughlyEnoughIDs logo"/>
 
@@ -14,3 +14,47 @@ Running on:
 - Gradle 9.2.1
 - RetroFuturaGradle 2.0.2
 - Forge 14.23.5.2847
+
+## API
+Since v2.3.0, this mod provides an API to allow mod authors to add REID compatibility. Generally, most mods will already
+be supported out of the box - this API is for certain elements of mods that require explicit support, either from REID's
+side through mixins, or from the mod's side. The API currently provides:
+- [`BiomeApi`](/src/main/java/org/dimdev/jeid/api/BiomeApi.java): Reading/writing biome ids in REID format. Any mod with
+mechanics that manually change biomes in a chunk should use this.
+
+See the javadocs for each api service for more details.
+
+### Usage example
+Before the API existed, some mods added compatibility for JEID/REID's extended biomes like so:
+```java
+public static void setBiome(World world, BlockPos pos, int id) {
+    Chunk chunk = world.getChunk(pos);
+    int i = ((pos.getZ() & 15) << 4) | (pos.getX() & 15);
+    // JEID/REID biome update
+    if (jeidLoaded && chunk instanceof INewChunk) {
+        ((INewChunk) chunk).getIntBiomeArray()[i] = id;
+    }
+    // Vanilla biome update
+    else {
+        chunk.getBiomeArray()[i] = (byte) id;
+    }
+}
+```
+(See an example [here](https://github.com/Um-Mitternacht/Bewitchment/blob/1.12.2/src/main/java/com/bewitchment/common/world/BiomeChangingUtils.java#L90-L102) by Bewitchment).
+The `BiomeApi` seeks to simplify this usage; now all you would need to update the biome in REID format is:
+```java
+public static void setBiome(World world, BlockPos pos, int id) {
+    Chunk chunk = world.getChunk(pos);
+    // REID biome update
+    if (reidApiLoaded) {
+        BiomeApi.INSTANCE.updateBiome(chunk, pos, id);
+    }
+    // Vanilla biome update
+    else {
+        // The index is only needed for vanilla now!
+        int i = ((pos.getZ() & 15) << 4) | (pos.getX() & 15);
+        chunk.getBiomeArray()[i] = (byte) id;
+    }
+}
+```
+This could also allow future versions of REID to change its biome format without breaking your compatibility code.

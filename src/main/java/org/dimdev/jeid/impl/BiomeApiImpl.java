@@ -31,7 +31,7 @@ public class BiomeApiImpl implements BiomeApi {
             return biomeContainer.getInternalBiomes();
         }
         // Fallback, shouldn't be reachable
-        REIDApi.logger.warn("BiomeApi's implementation was overwritten to {}!", BiomeApi.INSTANCE.getClass().getName());
+        REIDApi.LOGGER.warn("BiomeApi's implementation was overwritten to {}!", BiomeApi.INSTANCE.getClass().getName());
         return BiomeApi.INSTANCE.getBiomeAccessor(chunk).getBiomes();
     }
 

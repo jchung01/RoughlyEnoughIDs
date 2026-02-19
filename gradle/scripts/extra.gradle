@@ -42,6 +42,10 @@ tasks.register('apiJar', Jar) {
     }
 }
 
+tasks.build {
+    dependsOn(tasks.apiJar)
+}
+
 def getFile(String relativePath) {
     return new File(projectDir, relativePath)
 }

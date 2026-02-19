@@ -57,12 +57,18 @@ public class BiomeContainer implements BiomeAccessor {
 
     @Override
     public int getBiomeId(BlockPos pos) {
+        Preconditions.checkArgument(pos.getX() >> 4 == chunk.x);
+        Preconditions.checkArgument(pos.getZ() >> 4 == chunk.z);
+
         return getBiomeId(pos.getX() & 0xF, pos.getZ() & 0xF);
     }
 
     @Override
-    public int getBiomeId(int relativeX, int relativeZ) {
-        return getBiomeId(getIndex(relativeX, relativeZ));
+    public int getBiomeId(int chunkLocalX, int chunkLocalZ) {
+        Preconditions.checkArgument(chunkLocalX <= 15);
+        Preconditions.checkArgument(chunkLocalZ <= 15);
+
+        return getBiomeId(getIndex(chunkLocalX, chunkLocalZ));
     }
 
     public int getBiomeId(int index) {
