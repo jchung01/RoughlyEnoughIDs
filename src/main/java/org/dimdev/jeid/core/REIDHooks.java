@@ -7,9 +7,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.IChunkGenerator;
 
 import org.dimdev.jeid.api.BiomeApi;
-import org.dimdev.jeid.ducks.ICustomBiomesForGeneration;
-import org.dimdev.jeid.ducks.IModSupportsJEID;
-import org.dimdev.jeid.ducks.INewChunk;
+import org.dimdev.jeid.api.compat.CompatibleChunkGenerator;
 
 import javax.annotation.Nullable;
 
@@ -21,22 +19,11 @@ public class REIDHooks {
      * This guarantees the correct biomes even for modded chunk generators.
      */
     public static void initializeBiomeArray(Chunk chunk, @Nullable IChunkGenerator chunkGenerator) {
-        if (chunkGenerator instanceof IModSupportsJEID) {
+        if (chunkGenerator instanceof CompatibleChunkGenerator) {
             return;
         }
-        Biome[] biomes;
-        if (chunkGenerator instanceof ICustomBiomesForGeneration) {
-            // Some chunk generators modify the biomes beyond those returned by the BiomeProvider.
-            biomes = ((ICustomBiomesForGeneration) chunkGenerator).getBiomesForGeneration();
-        }
-        else {
-            biomes = chunk.getWorld().getBiomeProvider().getBiomes(reusableBiomeList, chunk.x * 16, chunk.z * 16, 16, 16);
-        }
-        int[] biomeIds = new int[256];
-        for (int i = 0; i < biomeIds.length; ++i) {
-            biomeIds[i] = Biome.getIdForBiome(biomes[i]);
-        }
-        BiomeApi.INSTANCE.replaceBiomes(chunk, biomeIds);
+        Biome[] biomes = chunk.getWorld().getBiomeProvider().getBiomes(reusableBiomeList, chunk.x * 16, chunk.z * 16, 16, 16);
+        BiomeApi.INSTANCE.replaceBiomes(chunk, biomes);
     }
 
     /**

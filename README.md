@@ -21,6 +21,7 @@ be supported out of the box - this API is for certain elements of mods that requ
 side through mixins, or from the mod's side. The API currently provides:
 - [`BiomeApi`](/src/main/java/org/dimdev/jeid/api/BiomeApi.java): Reading/writing biome ids in REID format. Any mod with
 mechanics that manually change biomes in a chunk should use this.
+- Various classes for compatibility: see [`api/compat`](/src/main/java/org/dimdev/jeid/api/compat) package.
 
 See the javadocs for each api service for more details.
 

@@ -1,6 +1,7 @@
 package org.dimdev.jeid.impl;
 
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 
 import com.google.common.base.Preconditions;
@@ -51,6 +52,21 @@ public class BiomeApiImpl implements BiomeApi {
                 "Failed to replace biomes for chunk ({}, {}), Expected array length: {}, Actual: {}",
                 chunk.x, chunk.z, biomeContainer.size(), biomeIds.length);
 
+        biomeContainer.setBiomes(biomeIds);
+        chunk.markDirty();
+    }
+
+    @Override
+    public void replaceBiomes(Chunk chunk, Biome[] biomes) {
+        BiomeContainer biomeContainer = getBiomeContainer(chunk);
+        Preconditions.checkArgument(biomes.length == biomeContainer.size(),
+                "Failed to replace biomes for chunk ({}, {}), Expected array length: {}, Actual: {}",
+                chunk.x, chunk.z, biomeContainer.size(), biomes.length);
+
+        int[] biomeIds = new int[biomeContainer.size()];
+        for (int i = 0; i < biomeIds.length; ++i) {
+            biomeIds[i] = Biome.getIdForBiome(biomes[i]);
+        }
         biomeContainer.setBiomes(biomeIds);
         chunk.markDirty();
     }

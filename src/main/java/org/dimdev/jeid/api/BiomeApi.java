@@ -1,6 +1,7 @@
 package org.dimdev.jeid.api;
 
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 
 import org.dimdev.jeid.api.biome.BiomeAccessor;
@@ -38,6 +39,15 @@ public interface BiomeApi {
      * @throws IllegalArgumentException if {@code biomeIds} does not match the length of the {@code chunk}'s array
      */
     void replaceBiomes(Chunk chunk, int[] biomeIds);
+
+    /**
+     * Updates all biomes in the specified chunk.
+     *
+     * @param chunk the chunk
+     * @param biomes an array of biomes to replace the chunk's array with
+     * @throws IllegalArgumentException if {@code biomes} does not match the length of the {@code chunk}'s array
+     */
+    void replaceBiomes(Chunk chunk, Biome[] biomes);
 
     /**
      * Fills the entire chunk with a single biome.
