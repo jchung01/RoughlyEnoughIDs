@@ -3,9 +3,13 @@
   "required": true,
   "refmap": "mixins.jeid.refmap.json",
   "minVersion": "0.8",
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  },
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MixinBlockSpreadBiome",
-    "MixinPurifyBiome"
+    "MixinBlockBiomePurifier",
+    "MixinBlockParasiteSpreading",
+    "MixinParasiteEventWorld"
   ]
 }

@@ -4,7 +4,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import org.dimdev.jeid.ducks.INewChunk;
+import org.dimdev.jeid.api.BiomeApi;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,7 +19,7 @@ public class MixinBiomeEntry {
 
     @Redirect(method = "getChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;getBiomeArray()[B", remap = true))
     private static byte[] reid$countIntBiomes(Chunk instance, @Local BaseWorldEntry.Counter<Biome> counter) {
-        final int[] biomeArray = ((INewChunk) instance).getIntBiomeArray();
+        final int[] biomeArray = BiomeApi.INSTANCE.getBiomeAccessor(instance).getBiomes();
         for (int id : biomeArray) {
             Biome biome = Biome.getBiome(id);
             if (biome != null) counter.add(biome);

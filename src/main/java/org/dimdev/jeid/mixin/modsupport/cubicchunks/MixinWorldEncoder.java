@@ -1,106 +1,114 @@
 package org.dimdev.jeid.mixin.modsupport.cubicchunks;
 
-import com.llamalad7.mixinextras.sugar.Local;
-import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
-import io.github.opencubicchunks.cubicchunks.api.util.Coords;
-import io.github.opencubicchunks.cubicchunks.core.world.cube.Cube;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.chunk.Chunk;
-import org.dimdev.jeid.ducks.INewChunk;
-import org.dimdev.jeid.ducks.modsupport.cubicchunks.INewCube;
+
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
+import io.github.opencubicchunks.cubicchunks.core.world.cube.Cube;
+import io.netty.buffer.ByteBuf;
+import org.dimdev.jeid.api.BiomeApi;
+import org.dimdev.jeid.api.biome.BiomeAccessor;
+import org.dimdev.jeid.impl.type.BiomeStorage;
+import org.dimdev.jeid.impl.type.BiomeContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Iterator;
 import java.util.List;
 
 @Mixin(targets = "io.github.opencubicchunks.cubicchunks.core.network.WorldEncoder", remap = false)
 public class MixinWorldEncoder {
-    @Redirect(method = "lambda$encodeCubes$0", at = @At(value = "INVOKE", target = "Lio/github/opencubicchunks/cubicchunks/core/world/cube/Cube;getBiomeArray()[B"))
-    private static byte[] reid$encodeCheckEmptiness(Cube instance) {
-        if (((INewCube) instance).getBiomeArray() != null) {
-            return new byte[0];
-        }
-        return null;
-    }
-
     @Inject(method = "lambda$encodeCubes$5", at = @At(value = "HEAD"), cancellable = true)
-    private static void reid$encodeBiomes(PacketBuffer out, Cube cube, CallbackInfo ci) {
-        int[] biomes = ((INewCube) cube).getBiomeArray();
-        if (biomes != null) {
-            for (int biome : biomes) {
-                out.writeInt(biome);
-            }
+    private static void reid$encodeCubeBiomes(PacketBuffer out, Cube cube, CallbackInfo ci) {
+        BiomeContainer cubeBiomes = ((BiomeStorage) cube).reid$getBiomes();
+        if (cubeBiomes.isInitialized()) {
+            reid$encodeBiomes(cubeBiomes, out);
         }
         ci.cancel();
     }
 
     @Redirect(method = "encodeColumn", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;writeBytes([B)Lio/netty/buffer/ByteBuf;", remap = true))
-    private static ByteBuf reid$writeColumnBiomeArray(PacketBuffer instance, byte[] oldBiomeArray, PacketBuffer out, Chunk column) {
-        int[] biomes = ((INewChunk) column).getIntBiomeArray();
-        //JEID.LOGGER.info("current biome: {}", biomes[128]);
-        for (int i = 0; i < 256; i++) {
-            out.writeInt(biomes[i]);
-        }
+    private static ByteBuf reid$writeColumnBiomes(PacketBuffer instance, byte[] oldBiomeArray, PacketBuffer out, Chunk column) {
+        reid$encodeBiomes((BiomeContainer) BiomeApi.INSTANCE.getBiomeAccessor(column), out);
         return out;
     }
 
     @Redirect(method = "decodeColumn", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;readBytes([B)Lio/netty/buffer/ByteBuf;", remap = true))
-    private static ByteBuf reid$readColumnBiomeArray(PacketBuffer instance, byte[] oldBiomeArray, PacketBuffer in, Chunk column) {
-        int[] biomes = new int[256];
-        for (int i = 0; i < 256; i++) {
-            biomes[i] = in.readInt();
-        }
-        ((INewChunk) column).setIntBiomeArray(biomes);
+    private static ByteBuf reid$readColumnBiomes(PacketBuffer instance, byte[] oldBiomeArray, PacketBuffer in, Chunk column) {
+        reid$decodeBiomes((BiomeContainer) BiomeApi.INSTANCE.getBiomeAccessor(column), in);
         return in;
     }
 
-    @Inject(method = "decodeCube",
-            slice = @Slice(
-                    id = "lastLoop",
-                    from = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/storage/ExtendedBlockStorage;recalculateRefCounts()V", remap = true)
-            ), at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/List;get(I)Ljava/lang/Object;", slice = "lastLoop"), cancellable = true
-    )
-    private static void reid$decodeBiomes(PacketBuffer in, List<Cube> cubes, CallbackInfo ci, @Local(ordinal = 0) int i) {
-        int[] blockBiomeArray = new int[Coords.BIOMES_PER_CUBE];
-        for (int j = 0; j < 64; j++)
-            blockBiomeArray[j] = in.readInt();
-        ((INewCube) cubes.get(i)).setBiomeArray(blockBiomeArray);
-        ci.cancel();
+    @Definition(id = "hasCustomBiomeMap", local = @Local(type = boolean[].class, name = "hasCustomBiomeMap"))
+    @Expression("hasCustomBiomeMap[?]")
+    @ModifyExpressionValue(method = "decodeCube", at = @At("MIXINEXTRAS:EXPRESSION"))
+    private static boolean reid$decodeCubeBiomes(boolean original, PacketBuffer in, List<Cube> cubes, @Local(name = "i") int i) {
+        if (original) {
+            Cube cube = cubes.get(i);
+            BiomeContainer cubeBiomes = ((BiomeStorage) cube).reid$getBiomes();
+            reid$decodeBiomes(cubeBiomes, in);
+        }
+        // Skip original decoding
+        return false;
     }
 
     /**
-     * @author Exsolutus
-     * @reason Encode int array size
+     * @author Exsolutus, jchung01
+     * @reason Encode int array size (in bytes)
      */
     @Overwrite
     static int getEncodedSize(Chunk column) {
-        // Could probably just inline the length
-        return (((INewChunk) column).getIntBiomeArray().length * Integer.BYTES) + (Cube.SIZE * Cube.SIZE * Integer.BYTES);
+        int biomeDataSize = reid$getBiomeBufferSize(BiomeApi.INSTANCE.getBiomeAccessor(column));
+        int heightmapDataSize = (Cube.SIZE * Cube.SIZE * Integer.BYTES);
+        return biomeDataSize + heightmapDataSize;
     }
 
     /**
-     * Intercepts iterator of for-each loop
-     *
-     * @reason Encode int array sizes for each cube
+     * Encode int array sizes for each cube
      */
-    //
-    @Inject(method = "getEncodedSize(Ljava/util/Collection;)I", at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/Collection;iterator()Ljava/util/Iterator;", ordinal = 1))
-    private static void reid$encodeCubeBiomeSizes(CallbackInfoReturnable<Integer> cir, @Local LocalIntRef size, @Local Iterator<Cube> iterator) {
-        while (iterator.hasNext()) {
-            Cube cube = iterator.next();
-            int[] biomeArray = ((INewCube) cube).getBiomeArray();
-            if (biomeArray == null)
-                continue;
-            size.set(size.get() + (Integer.BYTES * biomeArray.length));
+    @Definition(id = "biomeArray", local = @Local(type = byte[].class, name = "biomeArray"))
+    @Expression("biomeArray.length")
+    @ModifyExpressionValue(method = "getEncodedSize(Ljava/util/Collection;)I", at = @At("MIXINEXTRAS:EXPRESSION"))
+    private static int reid$encodeCubeBiomesSize(int original, @Local(name = "cube") Cube cube) {
+        BiomeContainer cubeBiomes = ((BiomeStorage) cube).reid$getBiomes();
+        return reid$getBiomeBufferSize(cubeBiomes);
+    }
+
+    /**
+     * Encodes biomes from a general {@link BiomeContainer} to a packet.
+     */
+    @Unique
+    private static void reid$encodeBiomes(BiomeContainer container, PacketBuffer out) {
+        int[] biomes = container.getInternalBiomes();
+        for (int biome : biomes) {
+            out.writeInt(biome);
         }
-        // Original for-each will now be skipped as iterator has been consumed
+    }
+
+    /**
+     * Decodes biomes from a packet to a general {@link BiomeContainer}.
+     */
+    @Unique
+    private static void reid$decodeBiomes(BiomeContainer container, PacketBuffer in) {
+        int[] biomes = new int[container.size()];
+        for (int i = 0; i < container.size(); i++) {
+            biomes[i] = in.readInt();
+        }
+        container.setBiomes(biomes);
+    }
+
+    /**
+     * Gets number of bytes to encode biomes from a general {@link BiomeAccessor}.
+     */
+    @Unique
+    private static int reid$getBiomeBufferSize(BiomeAccessor accessor) {
+        return accessor.size() * Integer.BYTES;
     }
 }

@@ -52,7 +52,7 @@ public abstract class MixinBlockStateContainer implements INewBlockStateContaine
      */
     @SuppressWarnings("deprecation")
     @Inject(method = "getDataForNBT", at = @At("HEAD"), cancellable = true)
-    private void reid$newGetDataForNBT(byte[] blockIds, NibbleArray data, CallbackInfoReturnable<NibbleArray> cir) {
+    public void reid$newGetDataForNBT(byte[] blockIds, NibbleArray data, CallbackInfoReturnable<NibbleArray> cir) {
         Reference2IntOpenHashMap<IBlockState> stateIDMap = new Reference2IntOpenHashMap<>();
         stateIDMap.defaultReturnValue(-1);
         int nextID = 0;
@@ -83,7 +83,6 @@ public abstract class MixinBlockStateContainer implements INewBlockStateContaine
 
         // Not using "Add" for anything
         cir.setReturnValue(null);
-        cir.cancel();
     }
 
     /**
@@ -92,7 +91,7 @@ public abstract class MixinBlockStateContainer implements INewBlockStateContaine
      */
     @SuppressWarnings("deprecation")
     @Inject(method = "setDataFromNBT", at = @At("HEAD"), cancellable = true)
-    private void reid$newSetDataFromNBT(byte[] blockIds, NibbleArray data, NibbleArray blockIdExtension, CallbackInfo ci) {
+    public void reid$newSetDataFromNBT(byte[] blockIds, NibbleArray data, NibbleArray blockIdExtension, CallbackInfo ci) {
         if (temporaryPalette == null) { // Read containers in palette format only if the container has a palette (has a palette)
             for (int index = 0; index < 4096; ++index) {
                 int x = index & 15;

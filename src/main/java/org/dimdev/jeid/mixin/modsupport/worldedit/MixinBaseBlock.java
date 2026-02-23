@@ -1,15 +1,14 @@
 package org.dimdev.jeid.mixin.modsupport.worldedit;
 
+import com.llamalad7.mixinextras.expression.Expression;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = BaseBlock.class, remap = false)
@@ -27,10 +26,9 @@ public class MixinBaseBlock {
         return Integer.MAX_VALUE - 1;
     }
 
-    @Dynamic("Set block id as int and set short id 0")
-    @ModifyVariable(method = "internalSetId", at = @At(value = "FIELD", ordinal = 0, opcode = Opcodes.PUTFIELD), argsOnly = true)
-    private int reid$setIntId(int id) {
+    @Expression("@((short) ?)")
+    @Inject(method = "internalSetId", at = @At("MIXINEXTRAS:EXPRESSION"))
+    private void reid$setIntId(int id, CallbackInfo ci) {
         reid$intId = id;
-        return 0;
     }
 }

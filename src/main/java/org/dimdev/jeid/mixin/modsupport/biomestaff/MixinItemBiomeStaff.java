@@ -10,10 +10,10 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.common.util.Constants;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import org.dimdev.jeid.ducks.INewChunk;
+import net.minecraftforge.common.util.Constants;
+import org.dimdev.jeid.api.BiomeApi;
 import org.dimdev.jeid.network.MessageManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,7 +38,7 @@ public class MixinItemBiomeStaff {
     private void reid$sneakUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ, CallbackInfoReturnable<EnumActionResult> cir,
                                @Local ItemStack heldStack, @Local NBTTagCompound tag) {
         Chunk chunk = world.getChunk(pos);
-        int biomeId = ((INewChunk) chunk).getIntBiomeArray()[(pos.getZ() & 0xF) << 4 | (pos.getX() & 0xF)];
+        int biomeId = BiomeApi.INSTANCE.getBiomeAccessor(chunk).getBiomeId(pos);
         if (!tag.hasKey(ItemBiomeStaff.TAG_BIOME, Constants.NBT.TAG_INT) || tag.getInteger(ItemBiomeStaff.TAG_BIOME) != biomeId) {
             tag.setInteger(ItemBiomeStaff.TAG_BIOME, biomeId);
             heldStack.setTagCompound(tag);
@@ -56,12 +56,12 @@ public class MixinItemBiomeStaff {
         int toBiomeId = tag.getInteger(ItemBiomeStaff.TAG_BIOME);
         for(int ix = pos.getX() - rad; ix <= pos.getX() + rad; ++ix) {
             for(int iz = pos.getZ() - rad; iz <= pos.getZ() + rad; ++iz) {
-                Chunk chunk = world.getChunk(new BlockPos(ix, pos.getY(), iz));
-                int[] biomeArray = ((INewChunk) chunk).getIntBiomeArray();
-                int biomeIdAtPos = biomeArray[(iz & 0xF) << 4 | (ix & 0xF)];
+                BlockPos currPos = new BlockPos(ix, pos.getY(), iz);
+                Chunk chunk = world.getChunk(currPos);
+
+                int biomeIdAtPos = BiomeApi.INSTANCE.getBiomeAccessor(chunk).getBiomeId(currPos);
                 if (biomeIdAtPos != toBiomeId) {
-                    chunk.markDirty();
-                    biomeArray[(iz & 0xF) << 4 | (ix & 0xF)] = toBiomeId;
+                    BiomeApi.INSTANCE.updateBiome(chunk, currPos, toBiomeId);
                 }
             }
         }

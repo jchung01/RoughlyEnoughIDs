@@ -1,15 +1,16 @@
 package org.dimdev.jeid.network;
 
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
+
+import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import org.dimdev.jeid.ducks.INewChunk;
+import org.dimdev.jeid.api.BiomeApi;
 
 public class BiomeChunkChangeMessage implements IMessage {
     private int chunkX;
@@ -46,7 +47,7 @@ public class BiomeChunkChangeMessage implements IMessage {
             Minecraft.getMinecraft().addScheduledTask(() -> {
                 WorldClient world = Minecraft.getMinecraft().world;
                 Chunk chunk = world.getChunk(message.chunkX, message.chunkZ);
-                ((INewChunk) chunk).setIntBiomeArray(message.biomeArray);
+                BiomeApi.INSTANCE.replaceBiomes(chunk, message.biomeArray);
                 world.markBlockRangeForRenderUpdate(new BlockPos(chunk.getPos().getXStart(), 0, chunk.getPos().getZStart()), new BlockPos(chunk.getPos().getXEnd(), world.getHeight(), chunk.getPos().getZEnd()));
             });
             return null;
