@@ -20,34 +20,11 @@ public class JEID {
     public static final String NAME = Tags.MOD_NAME;
     public static final String VERSION = Tags.VERSION;
     public static final String DEPENDENCIES = "required:mixinbooter@[10.7,);"
-        + "after:abyssalcraft;"
-        + "after:advancedrocketry;"
-        + "after:atum;"
-        + "after:biomesoplenty;"
-        + "after:biometweaker;"
-        + "after:bookshelf;"
-        + "after:compactmachines3;"
-        + "after:creepingnether;"
         + "after:cubicchunks@[1.12.2-0.0.1271.0-SNAPSHOT,);"
-        + "after:cyclopscore;"
-        + "after:extrautils2;"
-        + "after:gaiadimension;"
-        + "after:geographicraft;"
-        + "after:hammercore;"
-        + "after:journeymap;"
-        + "after:moreplanets;"
-        + "after:mystcraft;"
-        + "after:srparasites@[1.10.2,);"
-        + "after:thaumcraft;"
-        + "after:thebetweenlands;"
-        + "after:tofucraft;"
-        + "after:tropicraft;"
-        + "after:twilightforest;"
-        + "after:wyrmsofnyrus@[0.8,);"
-        + "after:worldedit";
+        + "after:wyrmsofnyrus@[0.8,);";
+
     @SidedProxy(clientSide = "org.dimdev.jeid.proxy.ClientProxy", serverSide = "org.dimdev.jeid.proxy.ServerProxy")
     public static IProxy proxy;
-
 
     @Mod.EventHandler
     public void onPreInit(FMLPreInitializationEvent event) {
