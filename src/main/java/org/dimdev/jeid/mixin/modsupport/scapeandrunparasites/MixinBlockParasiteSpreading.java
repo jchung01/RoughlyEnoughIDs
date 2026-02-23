@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = BlockParasiteSpreading.class, remap = false)
-public class MixinBlockSpreadBiome {
+public class MixinBlockParasiteSpreading {
     /**
      * Capture biome id (int) before cast to byte.
      */

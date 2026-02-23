@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = BlockBiomePurifier.class, remap = false)
-public class MixinPurifyBiome {
+public class MixinBlockBiomePurifier {
     /**
      * @author roguetictac, jchung01
      * @reason Support int biome id for resetting infected biome.
