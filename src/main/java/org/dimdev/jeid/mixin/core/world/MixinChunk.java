@@ -10,6 +10,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import org.dimdev.jeid.INewChunk;
+import org.dimdev.jeid.api.BiomeApi;
+import org.dimdev.jeid.api.biome.BiomeAccessor;
 import org.dimdev.jeid.impl.type.BiomeContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -27,11 +29,19 @@ public abstract class MixinChunk implements INewChunk {
         return reid$biomeContainer;
     }
 
+    /**
+     * @deprecated Use the {@link BiomeApi} to get a {@link BiomeAccessor} instead.
+     */
+    @Deprecated
     @Override
     public int[] getIntBiomeArray() {
         return reid$biomeContainer.getInternalBiomes();
     }
 
+    /**
+     * @deprecated Use {@link BiomeApi}'s update methods instead.
+     */
+    @Deprecated
     @Override
     public void setIntBiomeArray(int[] intBiomeArray) {
         reid$biomeContainer.setBiomes(intBiomeArray);
