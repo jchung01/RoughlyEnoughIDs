@@ -31,7 +31,7 @@ public class MixinBlock {
             return;
         }
         // Use JEID 28 bit ID + 4 bit meta
-        cir.setReturnValue((id << 4) + meta);
+        cir.setReturnValue((id << 4) | meta);
     }
 
     /**
