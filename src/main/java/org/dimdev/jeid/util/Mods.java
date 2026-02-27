@@ -39,6 +39,8 @@ public enum Mods {
     WYRMS_OF_NYRUS("wyrmsofnyrus"),
     ;
 
+    public static final String NEID_MIGRATION_KEY = "migratedNEIDToREID";
+
     public final String modId;
     private final ResourceLocation registryKey;
 

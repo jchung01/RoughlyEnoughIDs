@@ -24,8 +24,6 @@ public abstract class MixinBlockStateContainer implements INewBlockStateContaine
     private int[] temporaryPalette; // index -> state id
     @Unique
     private NibbleArray add2; // NEID format
-    @Unique
-    private boolean reid$hadNoPalette; // Vanilla format
 
     @Shadow
     protected abstract IBlockState get(int index);
@@ -46,11 +44,6 @@ public abstract class MixinBlockStateContainer implements INewBlockStateContaine
     @Override
     public void setLegacyAdd2(NibbleArray add2) {
         this.add2 = add2;
-    }
-
-    @Override
-    public boolean reid$isLegacyFormat() {
-        return !reid$hadNoPalette;
     }
 
     /**
@@ -101,7 +94,6 @@ public abstract class MixinBlockStateContainer implements INewBlockStateContaine
     @Inject(method = "setDataFromNBT", at = @At("HEAD"), cancellable = true)
     public void reid$newSetDataFromNBT(byte[] blockIds, NibbleArray data, NibbleArray blockIdExtension, CallbackInfo ci) {
         if (temporaryPalette == null) { // Read containers in palette format only if the container has a palette (has a palette)
-            reid$hadNoPalette = true;
             for (int index = 0; index < 4096; ++index) {
                 int x = index & 15;
                 int y = index >> 8 & 15;

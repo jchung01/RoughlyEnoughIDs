@@ -2,11 +2,11 @@ package org.dimdev.jeid.mixin.modsupport.chiselsandbits;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 
 import mod.chiselsandbits.chiseledblock.BlockChiseled;
 import mod.chiselsandbits.chiseledblock.NBTBlobConverter;
@@ -14,10 +14,11 @@ import mod.chiselsandbits.chiseledblock.TileEntityBlockChiseled;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlobStateInstance;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlobStateReference;
+import mod.chiselsandbits.helpers.ModUtil;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.util.Constants;
-import org.dimdev.jeid.JEID;
-import org.dimdev.jeid.ducks.INewBlockStateContainer;
+import org.dimdev.jeid.JEIDLogger;
+import org.dimdev.jeid.util.Mods;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Objects;
 import java.util.function.IntUnaryOperator;
 
 @Mixin(value = TileEntityBlockChiseled.class, remap = false)
@@ -55,28 +57,28 @@ public abstract class MixinTileEntityBlockChiseled extends TileEntity {
         Integer oldId = oldState.getValue(BlockChiseled.UProperty_Primary_BlockState);
         if (oldRef == null || oldId == null) return;
 
-        // Check the save format
-        BlockPos pos = getPos();
-        Chunk chunk = getWorld().getChunk(pos);
-        int sectionIndex = pos.getY() >> 4;
-        ExtendedBlockStorage storage = chunk.getBlockStorageArray()[sectionIndex];
-        INewBlockStateContainer container = (INewBlockStateContainer) storage.getData();
-
         int newId;
         VoxelBlobStateReference newRef;
-        if (JEID.worldSavedWithNEID) {
+        NBTBase worldSavedWithNEID = world.getWorldInfo().getAdditionalProperty(Mods.NEID_MIGRATION_KEY);
+        if (Objects.equals(worldSavedWithNEID, new NBTTagByte((byte) 1))) {
             newId = reid$convertNEIDStateId(oldId);
+            // Shouldn't happen, but try fallback
+            if (newId == 0) {
+                newId = reid$convertStateId(oldId);
+            }
             newRef = reid$recreateBlob(oldRef, MixinTileEntityBlockChiseled::reid$convertNEIDStateId);
         }
-        else if (container.reid$isLegacyFormat()) {
-            newId = reid$convertVanillaStateId(oldId);
-            newRef = reid$recreateBlob(oldRef, MixinTileEntityBlockChiseled::reid$convertVanillaStateId);
-        }
         else {
-            newId = oldId;
-            newRef = oldRef;
+            newId = reid$convertStateId(oldId);
+            newRef = reid$recreateBlob(oldRef, MixinTileEntityBlockChiseled::reid$convertStateId);
         }
 
+        // Something went wrong with the conversion, fallback to cobblestone
+        if (newId == 0) {
+            JEIDLogger.LOGGER.warn("Failed to convert chiseled block at ({}, {}, {}) - old id {}",
+                    getPos().getX(), getPos().getY(), getPos().getZ(), oldId);
+            newId = ModUtil.getStateId(Blocks.COBBLESTONE.getDefaultState());
+        }
         // Set the new state
         if (newId != oldId || newRef != oldRef) {
             IExtendedBlockState newState = getBasicState().withProperty(BlockChiseled.UProperty_Primary_BlockState, newId)
@@ -87,20 +89,17 @@ public abstract class MixinTileEntityBlockChiseled extends TileEntity {
     }
 
     @Unique
-    private static int reid$convertVanillaStateId(int oldId) {
-        // 4-bit meta + 12-bit ID
-        int i = oldId & 4095;
-        int j = oldId >> 12 & 15;
-        IBlockState state = Block.getBlockById(i).getStateFromMeta(j);
-        return Block.getStateId(state);
-    }
-
-    @Unique
     private static int reid$convertNEIDStateId(int oldId) {
         // 4-bit meta + 16-bit ID
         int i = oldId & 65535;
         int j = oldId >> 16 & 15;
         IBlockState state = Block.getBlockById(i).getStateFromMeta(j);
+        return Block.getStateId(state);
+    }
+
+    @Unique
+    private static int reid$convertStateId(int oldId) {
+        IBlockState state = Block.getStateById(oldId);
         return Block.getStateId(state);
     }
 

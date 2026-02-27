@@ -5,7 +5,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLModIdMappingEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import org.dimdev.jeid.debug.RegistryDebug;
 import org.dimdev.jeid.init.REIDBiomes;
 import org.dimdev.jeid.jeid.Tags;
@@ -26,7 +25,6 @@ public class JEID {
 
     @SidedProxy(clientSide = "org.dimdev.jeid.proxy.ClientProxy", serverSide = "org.dimdev.jeid.proxy.ServerProxy")
     public static IProxy proxy;
-    public static boolean worldSavedWithNEID;
 
     @Mod.EventHandler
     public void onPreInit(FMLPreInitializationEvent event) {
@@ -42,10 +40,5 @@ public class JEID {
     @Mod.EventHandler
     public void onRemap(FMLModIdMappingEvent event) {
         REIDBiomes.ERROR.updateMapping(event);
-    }
-
-    @Mod.EventHandler
-    public void onServerStopped(FMLServerStoppedEvent event) {
-        worldSavedWithNEID = false;
     }
 }
