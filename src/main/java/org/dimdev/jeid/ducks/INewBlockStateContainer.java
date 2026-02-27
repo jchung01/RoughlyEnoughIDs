@@ -9,4 +9,5 @@ public interface INewBlockStateContainer {
     void setTemporaryPalette(int[] temporaryPalette);
     int[] getTemporaryPalette();
     void setLegacyAdd2(NibbleArray add2);
+    boolean reid$isLegacyFormat();
 }

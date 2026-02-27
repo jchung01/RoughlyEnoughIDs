@@ -15,6 +15,7 @@ public enum Mods {
     BOOKSHELF("bookshelf"),
     COMPACT_MACHINES("compactmachines3"),
     CREEPING_NETHER("creepingnether"),
+    CHISELS_AND_BITS("chiselsandbits"),
     CHUNK_PREGENERATOR("chunkpregenerator"),
     CUBIC_CHUNKS("cubicchunks"),
     CYCLOPS_CORE("cyclopscore"),

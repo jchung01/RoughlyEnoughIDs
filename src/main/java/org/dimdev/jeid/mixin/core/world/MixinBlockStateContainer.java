@@ -1,13 +1,14 @@
 package org.dimdev.jeid.mixin.core.world;
 
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.NibbleArray;
+
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import org.dimdev.jeid.ducks.INewBlockStateContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,6 +24,8 @@ public abstract class MixinBlockStateContainer implements INewBlockStateContaine
     private int[] temporaryPalette; // index -> state id
     @Unique
     private NibbleArray add2; // NEID format
+    @Unique
+    private boolean reid$hadNoPalette; // Vanilla format
 
     @Shadow
     protected abstract IBlockState get(int index);
@@ -43,6 +46,11 @@ public abstract class MixinBlockStateContainer implements INewBlockStateContaine
     @Override
     public void setLegacyAdd2(NibbleArray add2) {
         this.add2 = add2;
+    }
+
+    @Override
+    public boolean reid$isLegacyFormat() {
+        return !reid$hadNoPalette;
     }
 
     /**
@@ -93,6 +101,7 @@ public abstract class MixinBlockStateContainer implements INewBlockStateContaine
     @Inject(method = "setDataFromNBT", at = @At("HEAD"), cancellable = true)
     public void reid$newSetDataFromNBT(byte[] blockIds, NibbleArray data, NibbleArray blockIdExtension, CallbackInfo ci) {
         if (temporaryPalette == null) { // Read containers in palette format only if the container has a palette (has a palette)
+            reid$hadNoPalette = true;
             for (int index = 0; index < 4096; ++index) {
                 int x = index & 15;
                 int y = index >> 8 & 15;

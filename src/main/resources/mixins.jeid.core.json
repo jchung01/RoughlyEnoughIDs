@@ -11,6 +11,7 @@
     "enchant.MixinEnchantmentHelper",
     "enchant.MixinItemEnchantedBook",
     "misc.MixinBlock",
+    "misc.MixinFMLContainer",
     "misc.MixinGameData",
     "misc.MixinStatList",
     "network.MixinPacketBuffer",
