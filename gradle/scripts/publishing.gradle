@@ -77,7 +77,7 @@ if (propertyBool('publish_to_curseforge')) {
                 changelog = parserChangelog()
                 changelogType = 'markdown'
             }
-            mainArtifact tasks.reobfJar, {
+            mainArtifact tasks.reobfJar.getArchiveFile(), {
                 displayName = "${propertyString('mod_name')} ${propertyString('mod_version')}"
                 if (propertyBool('use_mixins')) {
                     relations {
@@ -108,7 +108,7 @@ if (propertyBool('publish_to_modrinth')) {
         projectId = propertyString('modrinth_project_id')
         versionNumber = propertyString('mod_version')
         versionType = propertyString('release_type')
-        uploadFile = tasks.reobfJar
+        uploadFile = tasks.reobfJar.getArchiveFile()
         gameVersions = ['1.12.2']
         loaders = ['forge']
         debugMode = propertyBool('modrinth_debug')
