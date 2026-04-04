@@ -1,13 +1,12 @@
 package org.dimdev.jeid.mixin.core.world;
 
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.NibbleArray;
+
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import org.dimdev.jeid.ducks.INewBlockStateContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,16 +52,20 @@ public abstract class MixinBlockStateContainer implements INewBlockStateContaine
     @SuppressWarnings("deprecation")
     @Inject(method = "getDataForNBT", at = @At("HEAD"), cancellable = true)
     public void reid$newGetDataForNBT(byte[] blockIds, NibbleArray data, CallbackInfoReturnable<NibbleArray> cir) {
+        // State instance -> Palette id
         Reference2IntOpenHashMap<IBlockState> stateIDMap = new Reference2IntOpenHashMap<>();
         stateIDMap.defaultReturnValue(-1);
+        // Palette id -> State id
+        int[] palette = new int[4096];
         int nextID = 0;
         for (int index = 0; index < 4096; ++index) {
             IBlockState state = get(index);
             int paletteID = stateIDMap.getInt(state);
-            if (paletteID == stateIDMap.defaultReturnValue()) {
+            if (paletteID == -1) {
                 paletteID = nextID;
                 ++nextID;
                 stateIDMap.put(state, paletteID);
+                palette[paletteID] = Block.BLOCK_STATE_IDS.get(state);
             }
 
             int x = index & 15;
@@ -75,11 +78,7 @@ public abstract class MixinBlockStateContainer implements INewBlockStateContaine
         }
 
         temporaryPalette = new int[nextID];
-        ObjectIterator<Reference2IntMap.Entry<IBlockState>> entries = stateIDMap.reference2IntEntrySet().fastIterator();
-        while (entries.hasNext()) {
-            Reference2IntMap.Entry<IBlockState> entry = entries.next();
-            temporaryPalette[entry.getIntValue()] = Block.BLOCK_STATE_IDS.get(entry.getKey());
-        }
+        System.arraycopy(palette, 0, temporaryPalette, 0, nextID);
 
         // Not using "Add" for anything
         cir.setReturnValue(null);
